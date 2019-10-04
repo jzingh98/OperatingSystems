@@ -10,15 +10,15 @@ struct command constructCommand(char *input) {
 
     char *inCopy = strdup(input);
 
+    // Split input and place each argument (function and params) into struct
+    // Struct: [function, param1, param2, ... paramX, NULL]
     int currParam = 0;
     char *ptr = strtok(inCopy, DELIMS);
-
     while(ptr != NULL){
         cmd.params[currParam] = strdup(ptr);
         ptr = strtok(NULL, DELIMS);
         currParam++;
     }
-
     cmd.params[currParam + 1] = NULL;
 
     return cmd;
