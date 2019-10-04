@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	}
 
 
-    // fprintf(stdout, "Return status value for '%s': %d\n", cmd, retval);
+    fprintf(stdout, "Return status value for '%s': %d\n", cmd, retval);
 
 	return EXIT_SUCCESS;
 }
