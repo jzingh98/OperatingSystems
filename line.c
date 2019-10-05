@@ -3,7 +3,7 @@
 
 #include "line.h"
 
-#define DELIMS " "
+#define DELIMS "|"
 
 struct line constructLine(char *input) {
     struct line myLine;
@@ -22,4 +22,5 @@ struct line constructLine(char *input) {
     myLine.individualCommands[currCommand + 1] = NULL;
 
     return myLine;
+
 }

@@ -5,6 +5,7 @@
 #include <wait.h>
 
 #include "command.h"
+#include "line.h"
 
 #define MAX_INPUT_LEN 512
 
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
 	char *input = (char*) malloc(MAX_INPUT_LEN*sizeof(char));
 	size_t len = MAX_INPUT_LEN;
 	struct command cmd;
+	struct line myLine;
 	pid_t pid;
 	int status;
 
@@ -22,7 +24,12 @@ int main(int argc, char *argv[])
 	//TODO: fix, weird way of removing trailing newline
 	strtok(input, "\n");
 
-	cmd = constructCommand(input);
+    cmd = constructCommand(input);
+
+	// TODO (in progress)
+	myLine = constructLine(input);
+
+
 
 	pid = fork();
 	if(pid == 0) {
@@ -36,9 +43,6 @@ int main(int argc, char *argv[])
 		perror("fork");
 		exit(1);
 	}
-
-
-    fprintf(stdout, "Return status value for '%s': %d\n", cmd, retval);
 
 	return EXIT_SUCCESS;
 }
