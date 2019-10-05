@@ -18,31 +18,47 @@ int main(int argc, char *argv[])
 	pid_t pid;
 	int status;
 
+	// Get User Input
 	fprintf(stdout, "sshell$ ");
-
 	getline(&input, &len, stdin);
 	//TODO: fix, weird way of removing trailing newline
-	strtok(input, "\n");
 
-    cmd = constructCommand(input);
+	while ((strcmp("exit", input))){
 
-	// TODO (in progress)
-	myLine = constructLine(input);
+        strtok(input, "\n");
+
+        cmd = constructCommand(input);
+
+        // TODO (in progress)
+        myLine = constructLine(input);
 
 
 
-	pid = fork();
-	if(pid == 0) {
-		execvp(cmd.params[0], cmd.params);
-		perror("execvp");
-		exit(1);
-	} if(pid > 0) {
-		waitpid(-1, &status, 0);
-		fprintf(stderr, "+ completed '%s' [%d]\n", input, WEXITSTATUS(status));
-	} else {
-		perror("fork");
-		exit(1);
+        pid = fork();
+        if(pid == 0) {
+            execvp(cmd.params[0], cmd.params);
+            perror("execvp");
+            exit(1);
+        } if(pid > 0) {
+            waitpid(-1, &status, 0);
+            fprintf(stderr, "+ completed '%s' [%d]\n", input, WEXITSTATUS(status));
+        } else {
+            perror("fork");
+            exit(1);
+        }
+
+        // Get User Input
+        fprintf(stdout, "sshell$ ");
+        getline(&input, &len, stdin);
+        //TODO: fix, weird way of removing trailing newline
 	}
 
-	return EXIT_SUCCESS;
+
+    return EXIT_SUCCESS;
+
+
+
+
+
+
 }
