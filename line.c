@@ -37,6 +37,11 @@ struct line constructLine(char *input) {
         else {
             myLine.commandStructures[currCommand] = constructInnerCommand(strdup(token));
         }
+        //Check if errored out
+        if(myLine.commandStructures[currCommand].initialized == 0) {
+            myLine.initialized = 0;
+            return myLine;
+        }
         // Update token
         token = nextToken;
         nextToken = strtok_r(rest, DELIMS, &rest);
@@ -44,6 +49,7 @@ struct line constructLine(char *input) {
     }
     myLine.commandStrings[currCommand + 1] = NULL;
 
+    myLine.initialized = 1;
     return myLine;
 
 }

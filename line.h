@@ -9,6 +9,7 @@ struct line {
 
     struct command commandStructures[10];
 
+    int initialized;
 };
 
 struct line constructLine(char *input);
