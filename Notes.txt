@@ -21,7 +21,8 @@ __________________________________________________
 
 ----- PHASE 3 ------------------------------------
 
-TODO: Programs and their arguments
+Able to read arguments for functions.
+Parses arguments with space as delimiter
 
 __________________________________________________
 
