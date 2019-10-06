@@ -13,15 +13,19 @@ struct line constructLine(char *input) {
     memset(myLine.commandStructures, 0, sizeof(myLine.commandStructures));
 
     char *inCopy = strdup(input);
+    char* token;
+    char* rest = inCopy;
 
     // Split input and place each individual command into struct
     // Struct: [command1, command2, ... commandX, NULL]
     int currCommand = 0;
-    char *ptr = strtok(inCopy, DELIMS);
-    while (ptr != NULL) {
-        myLine.commandStrings[currCommand] = strdup(ptr);
-        myLine.commandStructures[currCommand] = constructCommand(strdup(ptr));
-        ptr = strtok(NULL, DELIMS); // TODO: Problem here. On second iteration of loop, immediately becomes null
+    token = strtok_r(rest, DELIMS, &rest);
+    while (token != NULL) {
+        // Create new command with current token
+        myLine.commandStrings[currCommand] = strdup(token);
+        myLine.commandStructures[currCommand] = constructCommand(strdup(token));
+        // Update token
+        token = strtok_r(rest, DELIMS, &rest);
         currCommand++;
     }
     myLine.commandStrings[currCommand + 1] = NULL;
@@ -29,3 +33,4 @@ struct line constructLine(char *input) {
     return myLine;
 
 }
+

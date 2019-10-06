@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         strtok(input, "\n");
         //cmd = constructCommand(input);
         myLine = constructLine(input);
-        cmd = myLine.commandStructures[0]; // Does not yet work for index > 0
+        cmd = myLine.commandStructures[1]; // Does not yet work for index > 0
 
         // Start Process
         pid = fork();
