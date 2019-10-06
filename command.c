@@ -9,7 +9,7 @@ struct command constructCommand(char *input) {
 
     // Initialize Struct
     struct command cmd;
-    memset(cmd.params, 0, sizeof(cmd));
+    memset(cmd.params, 0, sizeof(cmd.params));
 
     char *inCopy = strdup(input);
 

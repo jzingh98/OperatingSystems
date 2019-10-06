@@ -33,7 +33,9 @@ int main(int argc, char *argv[])
         fprintf(stdout, "sshell$ ");
         getline(&input, &len, stdin);
         strtok(input, "\n");
-        cmd = constructCommand(input);
+        //cmd = constructCommand(input);
+        myLine = constructLine(input);
+        cmd = myLine.commandStructures[0]; // Does not yet work for index > 0
 
         // Start Process
         pid = fork();
@@ -56,6 +58,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
+        // TODO: STR Compare
         continueLoop = 0;
 
 

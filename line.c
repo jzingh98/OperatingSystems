@@ -6,7 +6,11 @@
 #define DELIMS "|"
 
 struct line constructLine(char *input) {
+
+    // Initialize Struct
     struct line myLine;
+    memset(myLine.commandStrings, 0, sizeof(myLine.commandStrings));
+    memset(myLine.commandStructures, 0, sizeof(myLine.commandStructures));
 
     char *inCopy = strdup(input);
 
@@ -15,11 +19,12 @@ struct line constructLine(char *input) {
     int currCommand = 0;
     char *ptr = strtok(inCopy, DELIMS);
     while (ptr != NULL) {
-        myLine.individualCommands[currCommand] = strdup(ptr);
-        ptr = strtok(NULL, DELIMS);
+        myLine.commandStrings[currCommand] = strdup(ptr);
+        myLine.commandStructures[currCommand] = constructCommand(strdup(ptr));
+        ptr = strtok(NULL, DELIMS); // TODO: Problem here. On second iteration of loop, immediately becomes null
         currCommand++;
     }
-    myLine.individualCommands[currCommand + 1] = NULL;
+    myLine.commandStrings[currCommand + 1] = NULL;
 
     return myLine;
 
