@@ -3,8 +3,13 @@
 
 struct command {
     char *params[17];
+    char *inFile;
+    char *outFile;
 };
 
-struct command constructCommand(char *input);
+struct command constructInnerCommand(char *input);
+struct command constructFirstCommand(char *input);
+struct command constructLastCommand(char *input);
+struct command constructOnlyCommand(char *input);
 
 #endif
