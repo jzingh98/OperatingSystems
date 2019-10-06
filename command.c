@@ -6,8 +6,10 @@
 #define DELIMS " "
 #define IN_REDIRECT "<"
 #define OUT_REDIRECT ">"
+#define ERROR_T "1"
+#define ERROR_F "0"
 
-stuct command initCommand() {
+struct command initCommand() {
     struct command cmd;
     memset(cmd.params, 0, sizeof(cmd.params));
     cmd.inFile = NULL;
@@ -28,12 +30,12 @@ struct command constructInnerCommand(char *input) {
     while(ptr != NULL){
         if(strcmp(ptr, IN_REDIRECT) == 0) {
             fprintf(stderr, "Error: mislocated input redirection");
-            cmd.initialized = 0;
+            cmd.errored = ERROR_T;
             return cmd;
         }
         if(strcmp(ptr, OUT_REDIRECT) == 0) {
             fprintf(stderr, "Error: mislocated output redirection");
-            cmd.initialized = 0;
+            cmd.errored = ERROR_T;
             return cmd;
         }
         else{
@@ -44,7 +46,7 @@ struct command constructInnerCommand(char *input) {
     }
     cmd.params[currParam + 1] = NULL;
 
-    cmd.initialized = 1;
+    cmd.errored = ERROR_F;
     return cmd;
 }
 
@@ -62,9 +64,10 @@ struct command constructFirstCommand(char *input){
             ptr = strtok(NULL, DELIMS);
             cmd.inFile = strdup(ptr);
         }
-        else if(strcmp(ptr, OUT_REDIRECT) == 0) {
+        if(strcmp(ptr, OUT_REDIRECT) == 0) {
             fprintf(stderr, "Error: mislocated output redirection");
-            //TODO: break the loop and don't complete command.
+            cmd.errored = ERROR_T;
+            return cmd;
         }
         else {
             cmd.params[currParam] = strdup(ptr);
@@ -74,6 +77,7 @@ struct command constructFirstCommand(char *input){
     }
     cmd.params[currParam + 1] = NULL;
 
+    cmd.errored = ERROR_F;
     return cmd;
 }
 
@@ -89,7 +93,8 @@ struct command constructLastCommand(char *input) {
     while(ptr != NULL){
         if(strcmp(ptr, IN_REDIRECT) == 0) {
             fprintf(stderr, "Error: mislocated input redirection");
-            //TODO: break the loop and don't complete command.
+            cmd.errored = ERROR_T;
+            return cmd;
         }
         if(strcmp(ptr, OUT_REDIRECT) == 0) {
             ptr = strtok(NULL, DELIMS);
@@ -103,6 +108,7 @@ struct command constructLastCommand(char *input) {
     }
     cmd.params[currParam + 1] = NULL;
 
+    cmd.errored = ERROR_F;
     return cmd;
 }
 
@@ -131,5 +137,6 @@ struct command constructOnlyCommand(char *input) {
     }
     cmd.params[currParam + 1] = NULL;
 
+    cmd.errored = ERROR_F;
     return cmd;
 }

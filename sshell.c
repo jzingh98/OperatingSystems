@@ -7,6 +7,8 @@
 #include "line.h"
 
 #define MAX_INPUT_LEN 512
+#define ERROR_T "1"
+#define ERROR_F "0"
 
 int main(int argc, char *argv[])
 {
@@ -34,7 +36,12 @@ int main(int argc, char *argv[])
         strtok(input, "\n");
         //cmd = constructCommand(input);
         myLine = constructLine(input);
-        cmd = myLine.commandStructures[1]; // Does not yet work for index > 0
+        //check if line construction errored out
+        if(myLine.errored == 0) {
+            fprintf(stderr, "+ completed '%s' [%d]\n", input, 1);
+            continue;
+        }
+        cmd = myLine.commandStructures[0]; // Does not yet work for index > 0
 
         // Start Process
         pid = fork();

@@ -4,6 +4,8 @@
 #include "line.h"
 
 #define DELIMS "|"
+#define ERROR_T "1"
+#define ERROR_F "0"
 
 struct line constructLine(char *input) {
 
@@ -28,18 +30,18 @@ struct line constructLine(char *input) {
         if(currCommand == 0 && nextToken == NULL) {
             myLine.commandStructures[currCommand] = constructOnlyCommand(strdup(token));
         }
-        if(currCommand == 0) {
+        else if(currCommand == 0) {
             myLine.commandStructures[currCommand] = constructFirstCommand(strdup(token));
         }
-        if(nextToken == NULL) {
+        else if(nextToken == NULL) {
             myLine.commandStructures[currCommand] = constructLastCommand(strdup(token));
         }
         else {
             myLine.commandStructures[currCommand] = constructInnerCommand(strdup(token));
         }
         //Check if errored out
-        if(myLine.commandStructures[currCommand].initialized == 0) {
-            myLine.initialized = 0;
+        if(myLine.commandStructures[currCommand].errored == ERROR_T) {
+            myLine.errored = ERROR_T;
             return myLine;
         }
         // Update token
@@ -49,7 +51,7 @@ struct line constructLine(char *input) {
     }
     myLine.commandStrings[currCommand + 1] = NULL;
 
-    myLine.initialized = 1;
+    myLine.errored = ERROR_F;
     return myLine;
 
 }

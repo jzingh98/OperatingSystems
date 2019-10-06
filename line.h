@@ -1,4 +1,4 @@
-#ifndef PROJECT1_LINE_
+#ifndef PROJECT1_LINE_H
 #define PROJECT1_LINE_H
 
 #include "command.h"
@@ -9,7 +9,7 @@ struct line {
 
     struct command commandStructures[10];
 
-    int initialized;
+    int errored;
 };
 
 struct line constructLine(char *input);
