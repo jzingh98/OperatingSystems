@@ -5,6 +5,7 @@ struct command {
     char *params[17];
     char *inFile;
     char *outFile;
+    int initialized;
 };
 
 struct command constructInnerCommand(char *input);

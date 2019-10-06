@@ -28,11 +28,13 @@ struct command constructInnerCommand(char *input) {
     while(ptr != NULL){
         if(strcmp(ptr, IN_REDIRECT) == 0) {
             fprintf(stderr, "Error: mislocated input redirection");
-            //TODO: break the loop and don't complete command.
+            cmd.initialized = 0;
+            return cmd;
         }
         if(strcmp(ptr, OUT_REDIRECT) == 0) {
             fprintf(stderr, "Error: mislocated output redirection");
-            //TODO: break the loop and don't complete command.
+            cmd.initialized = 0;
+            return cmd;
         }
         else{
             cmd.params[currParam] = strdup(ptr);
@@ -42,6 +44,7 @@ struct command constructInnerCommand(char *input) {
     }
     cmd.params[currParam + 1] = NULL;
 
+    cmd.initialized = 1;
     return cmd;
 }
 
