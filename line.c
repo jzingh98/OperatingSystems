@@ -14,18 +14,32 @@ struct line constructLine(char *input) {
 
     char *inCopy = strdup(input);
     char* token;
+    char* nextToken;
     char* rest = inCopy;
 
     // Split input and place each individual command into struct
     // Struct: [command1, command2, ... commandX, NULL]
     int currCommand = 0;
     token = strtok_r(rest, DELIMS, &rest);
+    nextToken = strtok_r(rest, DELIMS, &rest);
     while (token != NULL) {
         // Create new command with current token
         myLine.commandStrings[currCommand] = strdup(token);
-        myLine.commandStructures[currCommand] = constructCommand(strdup(token));
+        if(currCommand == 0 && nextToken == NULL) {
+            myLine.commandStructures[currCommand] = constructOnlyCommand(strdup(token));
+        }
+        if(currCommand == 0) {
+            myLine.commandStructures[currCommand] = constructFirstCommand(strdup(token));
+        }
+        if(nextToken == NULL) {
+            myLine.commandStructures[currCommand] = constructLastCommand(strdup(token));
+        }
+        else {
+            myLine.commandStructures[currCommand] = constructInnerCommand(strdup(token));
+        }
         // Update token
-        token = strtok_r(rest, DELIMS, &rest);
+        token = nextToken;
+        nextToken = strtok_r(rest, DELIMS, &rest);
         currCommand++;
     }
     myLine.commandStrings[currCommand + 1] = NULL;
