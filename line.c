@@ -27,6 +27,7 @@ struct line constructLine(char *input) {
     while (token != NULL) {
         // Create new command with current token
         myLine.commandStrings[currCommand] = strdup(token);
+        // Determine type of command
         if(currCommand == 0 && nextToken == NULL) {
             myLine.commandStructures[currCommand] = constructOnlyCommand(strdup(token));
         }
