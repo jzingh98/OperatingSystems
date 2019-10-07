@@ -14,7 +14,7 @@
 #define COMMANDDELIMS "|"
 
 void startPipeline(char* input, int currCommand);
-void continuepipeline(char *process1, char *process2);
+void continuePipeline(char *process1, char *process2);
 
 
 int main(int argc, char *argv[])
@@ -64,7 +64,7 @@ void startPipeline (char* input, currCommand) {
     token = strtok_r(rest, COMMANDDELIMS, &rest);
 
     // Start Recursion
-    continuepipeline(token, rest);
+    continuePipeline(token, rest);
 
 
 }
@@ -72,7 +72,7 @@ void startPipeline (char* input, currCommand) {
 
 
 
-void continuepipeline(char *process1, char *process2)
+void continuePipeline(char *process1, char *process2)
 {
     int fd[2];
     pipe(fd); /* Create pipe */
@@ -96,7 +96,7 @@ void continuepipeline(char *process1, char *process2)
             char* token = strtok_r(rest, COMMANDDELIMS, &rest);
 
             // Recursive call
-            continuepipeline(token, rest);
+            continuePipeline(token, rest);
         }
 
     } else {
