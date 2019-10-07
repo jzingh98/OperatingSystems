@@ -32,6 +32,10 @@ int main(int argc, char *argv[])
         getline(&input, &len, stdin);
         strtok(input, "\n");
         subcommand(input, 0);
+
+        // TODO STR Compare
+        continueLoop = 0;
+
 	} while (continueLoop == 1);
 
 }
@@ -60,21 +64,21 @@ void subcommand (char* input, currCommand) {
 
     // Peek at the next command without modifying rest
     restCopy = strdup(rest);
-    nextToken = strtok_r(rest, COMMANDDELIMS, &rest);
+    nextToken = strtok_r(restCopy, COMMANDDELIMS, &rest);
 
     // This is the last recursive call
     if (nextToken == NULL){
         if (currCommand == 0){
-            cmd = constructOnlyCommand(strdup(token));
+            cmd = constructCommand(strdup(token), 1, 1);
         } else {
-            cmd = constructLastCommand(strdup(token));
+            cmd = constructCommand(strdup(token), 0, 1);
         }
     // This is not the last recursive call
     } else {
         if (currCommand == 0){
-            cmd = constructFirstCommand(strdup(token));
+            cmd = constructCommand(strdup(token),1, 0);
         } else {
-            cmd = constructInnerCommand(strdup(token));
+            cmd = constructCommand(strdup(token), 0, 0);
         }
     }
    // TODO: Check if errored out
@@ -100,9 +104,6 @@ void subcommand (char* input, currCommand) {
         perror("fork");
         exit(1);
     }
-
-    // TODO: STR Compare
-    continueLoop = 0;
 
 
 
