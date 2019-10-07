@@ -13,8 +13,8 @@
 
 #define COMMANDDELIMS "|"
 
-void subcommand(char* input, int currCommand);
-void pipeline(char *process1, char *process2);
+void startPipeline(char* input, int currCommand);
+void continuepipeline(char *process1, char *process2);
 
 
 int main(int argc, char *argv[])
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         fprintf(stdout, "sshell$ ");
         getline(&input, &len, stdin);
         strtok(input, "\n");
-        subcommand(input, 0);
+        startPipeline(input, 0);
 
         // TODO STR Compare
         continueLoop = 0;
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
 
 
-void subcommand (char* input, currCommand) {
+void startPipeline (char* input, currCommand) {
 
     // Data Structures
     struct command cmd;
@@ -64,7 +64,7 @@ void subcommand (char* input, currCommand) {
     token = strtok_r(rest, COMMANDDELIMS, &rest);
 
     // Start Recursion
-    pipeline(token, rest);
+    continuepipeline(token, rest);
 
 
 }
@@ -72,7 +72,7 @@ void subcommand (char* input, currCommand) {
 
 
 
-void pipeline(char *process1, char *process2)
+void continuepipeline(char *process1, char *process2)
 {
     int fd[2];
     pipe(fd); /* Create pipe */
@@ -96,7 +96,7 @@ void pipeline(char *process1, char *process2)
             char* token = strtok_r(rest, COMMANDDELIMS, &rest);
 
             // Recursive call
-            pipeline(token, rest);
+            continuepipeline(token, rest);
         }
 
     } else {
