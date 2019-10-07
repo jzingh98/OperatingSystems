@@ -8,9 +8,6 @@ struct command {
     int errored;
 };
 
-struct command constructInnerCommand(char *input);
-struct command constructFirstCommand(char *input);
-struct command constructLastCommand(char *input);
-struct command constructOnlyCommand(char *input);
+struct command constructCommand(char *input, int first, int last);
 
 #endif
