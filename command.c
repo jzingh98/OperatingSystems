@@ -18,125 +18,63 @@ struct command initCommand() {
     return cmd;
 }
 
-struct command constructInnerCommand(char *input) {
-    struct command cmd = initCommand();
-
-    char *inCopy = strdup(input);
-
-    // Split input and place each argument (function and params) into struct
-    // Struct: [function, param1, param2, ... paramX, NULL]
-    int currParam = 0;
-    char *ptr = strtok(inCopy, DELIMS);
-    while(ptr != NULL){
-        if(strcmp(ptr, IN_REDIRECT) == 0) {
-            fprintf(stderr, "Error: mislocated input redirection");
-            cmd.errored = ERROR_T;
-            return cmd;
-        }
-        if(strcmp(ptr, OUT_REDIRECT) == 0) {
-            fprintf(stderr, "Error: mislocated output redirection");
-            cmd.errored = ERROR_T;
-            return cmd;
-        }
-        else{
-            cmd.params[currParam] = strdup(ptr);
-            ptr = strtok(NULL, DELIMS);
-            currParam++;
-        }
-    }
-    cmd.params[currParam + 1] = NULL;
-
-    cmd.errored = ERROR_F;
-    return cmd;
-}
-
-struct command constructFirstCommand(char *input){
-    struct command cmd = initCommand();
-
-    char *inCopy = strdup(input);
-
-    // Split input and place each argument (function and params) into struct
-    // Struct: [function, param1, param2, ... paramX, NULL]
-    int currParam = 0;
-    char *ptr = strtok(inCopy, DELIMS);
-    while(ptr != NULL){
-        if(strcmp(ptr, IN_REDIRECT) == 0) {
-            ptr = strtok(NULL, DELIMS);
-            cmd.inFile = strdup(ptr);
-        }
-        if(strcmp(ptr, OUT_REDIRECT) == 0) {
-            fprintf(stderr, "Error: mislocated output redirection");
-            cmd.errored = ERROR_T;
-            return cmd;
+//checks if the current character is an IO redirect and then will print error and set errored == 1 if there shouldn't
+// be a redirect or reads in the next token and sets the inFile/outFile to that token.
+// Returns 1 if there was a redirect and 0 if there wasn't
+int checkIORedirect(struct command *cmdPtr, char **inPtr, int first, int last) {
+    if(strcmp(*inPtr, IN_REDIRECT) == 0) {
+        if(first == 1) {
+            *inPtr = strtok(NULL, DELIMS);
+            cmdPtr->inFile = strdup(*inPtr);
         }
         else {
-            cmd.params[currParam] = strdup(ptr);
-            ptr = strtok(NULL, DELIMS);
-            currParam++;
+            fprintf(stderr, "Error: mislocated input redirection");
+            cmdPtr->errored = ERROR_T;
         }
+        return 1;
     }
-    cmd.params[currParam + 1] = NULL;
-
-    cmd.errored = ERROR_F;
-    return cmd;
+    if(strcmp(*inPtr, OUT_REDIRECT) == 0) {
+        if(last == 1) {
+            *inPtr = strtok(NULL, DELIMS);
+            cmdPtr->outFile = strdup(*inPtr);
+        }
+        else {
+            fprintf(stderr, "Error: mislocated output redirection");
+            cmdPtr->errored = ERROR_T;
+        }
+        return 1;
+    }
+    return 0;
 }
 
-struct command constructLastCommand(char *input) {
+struct command constructCommand(char *input, int first, int last) {
     struct command cmd = initCommand();
+    int redirected;
 
     char *inCopy = strdup(input);
+
+    cmd.errored = ERROR_F;
 
     // Split input and place each argument (function and params) into struct
     // Struct: [function, param1, param2, ... paramX, NULL]
     int currParam = 0;
-    char *ptr = strtok(inCopy, DELIMS);
-    while(ptr != NULL){
-        if(strcmp(ptr, IN_REDIRECT) == 0) {
-            fprintf(stderr, "Error: mislocated input redirection");
-            cmd.errored = ERROR_T;
+    char *input = strtok(inCopy, DELIMS);
+    while(input != NULL) {
+//        if(currParam == 16) {
+//            cmd.errored = 1;
+//            fprintf(stderr, )
+//        }
+        redirected = checkIORedirect(&cmd, &input, first, last);
+        if(cmd.errored == 1) {
             return cmd;
         }
-        if(strcmp(ptr, OUT_REDIRECT) == 0) {
-            ptr = strtok(NULL, DELIMS);
-            cmd.outFile = strdup(ptr);
+        else if(redirected == 1) {
+            continue;
         }
-        else{
-            cmd.params[currParam] = strdup(ptr);
-            ptr = strtok(NULL, DELIMS);
+        else {
+            cmd.params[currParam] = strdup(input);
+            input = strtok(NULL, DELIMS);
             currParam++;
         }
     }
-    cmd.params[currParam + 1] = NULL;
-
-    cmd.errored = ERROR_F;
-    return cmd;
-}
-
-struct command constructOnlyCommand(char *input) {
-    struct command cmd = initCommand();
-
-    char *inCopy = strdup(input);
-
-    // Split input and place each argument (function and params) into struct
-    // Struct: [function, param1, param2, ... paramX, NULL]
-    int currParam = 0;
-    char *ptr = strtok(inCopy, DELIMS);
-    while(ptr != NULL) {
-        if (strcmp(ptr, IN_REDIRECT) == 0) {
-            ptr = strtok(NULL, DELIMS);
-            cmd.inFile = strdup(ptr);
-        }
-        if (strcmp(ptr, OUT_REDIRECT) == 0) {
-            ptr = strtok(NULL, DELIMS);
-            cmd.outFile = strdup(ptr);
-        } else {
-            cmd.params[currParam] = strdup(ptr);
-            ptr = strtok(NULL, DELIMS);
-            currParam++;
-        }
-    }
-    cmd.params[currParam + 1] = NULL;
-
-    cmd.errored = ERROR_F;
-    return cmd;
 }
