@@ -4,8 +4,8 @@
 #include "line.h"
 
 #define DELIMS "|"
-#define ERROR_T "1"
-#define ERROR_F "0"
+#define ERROR_T 1
+#define ERROR_F 0
 
 struct line constructLine(char *input) {
 
@@ -18,6 +18,8 @@ struct line constructLine(char *input) {
     char* token;
     char* nextToken;
     char* rest = inCopy;
+    int first;
+    int last;
 
     // Split input and place each individual command into struct
     // Struct: [command1, command2, ... commandX, NULL]
@@ -27,18 +29,16 @@ struct line constructLine(char *input) {
     while (token != NULL) {
         // Create new command with current token
         myLine.commandStrings[currCommand] = strdup(token);
-        if(currCommand == 0 && nextToken == NULL) {
-            myLine.commandStructures[currCommand] = constructOnlyCommand(strdup(token));
-        }
-        else if(currCommand == 0) {
-            myLine.commandStructures[currCommand] = constructFirstCommand(strdup(token));
-        }
-        else if(nextToken == NULL) {
-            myLine.commandStructures[currCommand] = constructLastCommand(strdup(token));
-        }
-        else {
-            myLine.commandStructures[currCommand] = constructInnerCommand(strdup(token));
-        }
+
+        // Check if first or last command in the line
+        if(currCommand == 0) first = 1;
+        else first = 0;
+        if(nextToken == NULL) last = 1;
+        else last = 0;
+
+        //Construct the command
+        myLine.commandStructures[currCommand] = constructCommand(strdup(token), first, last);
+
         //Check if errored out
         if(myLine.commandStructures[currCommand].errored == ERROR_T) {
             myLine.errored = ERROR_T;
