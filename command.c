@@ -6,6 +6,7 @@
 #define DELIMS " "
 #define IN_REDIRECT "<"
 #define OUT_REDIRECT ">"
+#define BACKGROUND_COMMAND "&"
 #define ERROR_T 1
 #define ERROR_F 0
 
@@ -18,6 +19,10 @@ struct command initCommand() {
     return cmd;
 }
 
+//1. "Error: missing command"
+//2. "Error: mislocated output/input redirection"
+//3. "Error: no output/input file"
+//4. "Error: mislocated background sign"
 /*
  * checks if there is an input redirection.
  * returns 1 if there was, 0 if not, and -1 if there was an error.
@@ -50,7 +55,7 @@ int checkOutRedirect(struct command *cmdPtr, char **inPtr, int last) {
         if(last == 1) {
             *inPtr = strtok(NULL, DELIMS);
             if(*inPtr == NULL) {
-                fprintf(stderr, "Error: no input file\n");
+                fprintf(stderr, "Error: no output file\n");
                 return -1;
             }
             cmdPtr->inFile = strdup(*inPtr);
@@ -77,12 +82,23 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     // Struct: [function, param1, param2, ... paramX, NULL]
     int currParam = 0;
     char *param = strtok(cmdStrCpy, DELIMS);
+
+    if(strcmp(param,IN_REDIRECT) == 1 || strcmp(param, OUT_REDIRECT) == 1 || strcmp(param, BACKGROUND_COMMAND) == 1) {
+        fprintf(stderr, "Error: missing command\n");
+        cmd.errored = ERROR_T;
+        return cmd;
+    }
+
     while(param != NULL) {
+        if(strcmp(param, BACKGROUND_COMMAND) == 1) {
+            fprintf(stderr, "Error: mislocated background sign\n");
+            cmd.errored = ERROR_T;
+            return cmd;
+        }
         if(currParam == 16) {
-            cmd.errored = 1;
             fprintf(stderr, "Error: too many process arguments\n");
             cmd.errored = ERROR_T;
-            break;
+            return cmd;
         }
 
         inRedirected = checkInRedirect(&cmd, &param, first);
