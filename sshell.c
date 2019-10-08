@@ -5,7 +5,6 @@
 #include <wait.h>
 
 #include "command.h"
-#include "line.h"
 
 #define MAX_INPUT_LEN 512
 #define ERROR_T "1"
@@ -14,7 +13,7 @@
 #define COMMANDDELIMS "|"
 
 void startPipeline(char* input, int currCommand);
-void continuePipeline(char *process1, char *process2);
+void continuePipeline(char *process1, char *process2, int* fd);
 
 
 int main(int argc, char *argv[])
@@ -44,14 +43,10 @@ int main(int argc, char *argv[])
 
 
 
-void startPipeline (char* input, currCommand) {
+void startPipeline (char* input, int currCommand) {
 
     // Data Structures
     struct command cmd;
-
-    // Other Variables
-    pid_t pid;
-    int status;
 
     // Input String Variables
     char* token;
@@ -63,60 +58,85 @@ void startPipeline (char* input, currCommand) {
     rest = strdup(input);
     token = strtok_r(rest, COMMANDDELIMS, &rest);
 
-    // Start Recursion
-    continuePipeline(token, rest);
+    // Pipe Variables
+    int fd[2];
+    pipe(fd);
 
+    // Start Recursion
+    continuePipeline(token, rest, fd);
 
 }
 
 
 
 
-void continuePipeline(char *process1, char *process2)
+void continuePipeline(char *process1, char *process2, int* fd)
 {
-    int fd[2];
-    pipe(fd); /* Create pipe */
+
+    int status;
+
+    /* Parent */
     if (fork() != 0) {
-        /* Parent */
-        // Always waits for the child to finish.
-        waitpid(-1, &status, 0);
 
         // Base Case: after waiting, checks process 2, null. Return
-        if (strcmp(process2, NULL) == 0){
-            fprintf(stderr, "+ completed '%s' [%d]\n", input, WEXITSTATUS(status));
+        if (strcmp(process2, "") == 0){
+            // Read from Input
+            char inbuf[10];
+            memset(inbuf, 0, sizeof(inbuf));
+            read(fd[0], inbuf, 10);
+
+            if(inbuf[0] != 0){
+                fprintf(stderr, "read something");
+            }
+
+            fprintf(stderr, "+ completed '%s' [%d]\n", process1, WEXITSTATUS(status));
             //return EXIT_SUCCESS;
         } else{
-            // Recursive Case: after waiting, checks process 2. Not null. Calls itself with token and chop
-            close(fd[0]); /* Don't need read access to pipe */
-            dup2(fd[1], STDOUT_FILENO); /* Replace stdout with the pipe */
-            close(fd[1]); /* Close now unused file descriptor */
+
+
+
+            // Read from Input
+            //char inbuf[100];
+            //memset(inbuf, 0, sizeof(inbuf));
+            //read(fd[0], inbuf, 100);
 
             // Chop off first command from input line
             char* rest = strdup(process2);
             char* token = strtok_r(rest, COMMANDDELIMS, &rest);
 
+            // Append input from pipe to token
+            //strcat (token, " ");
+            //strcat (token, inbuf);
+
             // Recursive call
-            continuePipeline(token, rest);
+            continuePipeline(token, rest, fd);
         }
 
+    /* Child */
     } else {
-        /* Child */
-        // Always executes process 1.
+        // Always executes process 1
 
         // Construct command
         struct command cmd;
         cmd = constructCommand(strdup(process1), 0, 0);
 
-        // Make Pipe Connection
+        // Replace Output
+        close(fd[0]); /* Don't need read access to pipe */
+        dup2(fd[1], STDOUT_FILENO); /* Replace stdout with the pipe */
+
+        // Replace Input
         close(fd[1]); /* Don't need write access to pipe */
-        close(STDIN_FILENO); /* Close existing stdin */
-        dup(fd[0]); /* And replace it with the pipe */
+        dup2(fd[0], STDIN_FILENO); /* Replace stdin with the pipe */
+
+        // Close connections
         close(fd[0]); /* Close now unused file descriptor */
+        close(fd[1]); /* Close now unused file descriptor */
 
         // Execute process
         execvp(cmd.params[0], cmd.params);
-        perror("execvp");
-        exit(1);
+
+        // // Add Newline to pipe
+        // write(fd[1], "\n", sizeof("\n"));
 
     }
 }
@@ -124,5 +144,5 @@ void continuePipeline(char *process1, char *process2)
 
 
 
-
+// echo toto | tr o i
 
