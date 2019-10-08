@@ -90,6 +90,11 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     }
 
     while(param != NULL) {
+        if(strcmp(param, BACKGROUND_COMMAND) == 1) {
+            fprintf(stderr, "Error: mislocated background sign\n");
+            cmd.errored = ERROR_T;
+            return cmd;
+        }
         if(currParam == 16) {
             fprintf(stderr, "Error: too many process arguments\n");
             cmd.errored = ERROR_T;
