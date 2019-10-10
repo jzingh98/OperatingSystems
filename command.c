@@ -132,13 +132,17 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     return cmd;
 }
 
-//Returns 0 if there was no errors.
-//Returns 1 if there was an error.
-int runCommand(struct command cmd, int isPiped) {
+//Returns the PID of the child process.
+//Returns -1 if there was an error.
+pid_t runCommand(struct command cmd, int isPiped) {
     pid_t pid;
+    int fd[2];
 
     if(isPiped == 1){
-        //TODO:add piping
+        if(pipe(fd) < 0) {
+            perror("pipe");
+            return -1;
+        }
     }
 
     pid = fork();
@@ -155,15 +159,27 @@ int runCommand(struct command cmd, int isPiped) {
             dup2(outFile, STDOUT_FILENO);
             close(outFile);
         }
+        //Setup Pipe
+        if(isPiped == 1) {
+            dup2(fd[1], STDOUT_FILENO);
+            close(fd[0]);
+            close(fd[1]);
+        }
         //Run child command
         execvp(cmd.params[0], cmd.params);
         perror("execvp");
         exit(1);
     } if(pid > 0) {
+        //Setup Pipe
+        if(isPiped == 1) {
+            dup2(fd[0], STDIN_FILENO);
+            close(fd[0]);
+            close(fd[1]);
+        }
         // Return the pipe out
-        return 0;
+        return pid;
     } else {
         perror("fork");
-        return 1;
+        return -1;
     }
 }

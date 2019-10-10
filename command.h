@@ -11,6 +11,6 @@ struct command {
 };
 
 struct command constructCommand(char *input, int first, int last);
-int runCommand(struct command cmd, int isPiped);
+pid_t runCommand(struct command cmd, int isPiped);
 
 #endif
