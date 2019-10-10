@@ -1,5 +1,8 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "command.h"
 
@@ -27,15 +30,15 @@ struct command initCommand() {
  * checks if there is an input redirection.
  * returns 1 if there was, 0 if not, and -1 if there was an error.
  */
-int checkInRedirect(struct command *cmdPtr, char **inPtr, int first) {
-    if(strcmp(*inPtr, IN_REDIRECT) == 0) {
+int checkInRedirect(struct command *cmdPtr, char **inputPtr, int first) {
+    if(strcmp(*inputPtr, IN_REDIRECT) == 0) {
         if(first == 1) {
-            *inPtr = strtok(NULL, DELIMS);
-            if(*inPtr == NULL) {
+            *inputPtr = strtok(NULL, DELIMS);
+            if(*inputPtr == NULL) {
                 fprintf(stderr, "Error: no input file\n");
                 return -1;
             }
-            cmdPtr->inFile = strdup(*inPtr);
+            cmdPtr->inFile = strdup(*inputPtr);
             return 1;
         }
         else {
@@ -50,15 +53,15 @@ int checkInRedirect(struct command *cmdPtr, char **inPtr, int first) {
  * checks if there is an input redirection.
  * returns 1 if there was, 0 if not, and -1 if there was an error.
  */
-int checkOutRedirect(struct command *cmdPtr, char **inPtr, int last) {
-    if(strcmp(*inPtr, OUT_REDIRECT) == 0) {
+int checkOutRedirect(struct command *cmdPtr, char **inputPtr, int last) {
+    if(strcmp(*inputPtr, OUT_REDIRECT) == 0) {
         if(last == 1) {
-            *inPtr = strtok(NULL, DELIMS);
-            if(*inPtr == NULL) {
+            *inputPtr = strtok(NULL, DELIMS);
+            if(*inputPtr == NULL) {
                 fprintf(stderr, "Error: no output file\n");
                 return -1;
             }
-            cmdPtr->inFile = strdup(*inPtr);
+            cmdPtr->outFile = strdup(*inputPtr);
             return 1;
         }
         else {
@@ -127,4 +130,40 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     }
 
     return cmd;
+}
+
+//Returns 0 if there was no errors.
+//Returns 1 if there was an error.
+int runCommand(struct command cmd, int isPiped) {
+    pid_t pid;
+
+    if(isPiped == 1){
+        //TODO:add piping
+    }
+
+    pid = fork();
+    if(pid == 0) {
+        // Child Process
+        //Setup IO redirects/Piping
+        if(cmd.inFile != NULL) {
+            int inFile = open(cmd.inFile, O_RDONLY);
+            dup2(inFile, STDIN_FILENO);
+            close(inFile);
+        }
+        if(cmd.outFile != NULL) {
+            int outFile = open(cmd.outFile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+            dup2(outFile, STDOUT_FILENO);
+            close(outFile);
+        }
+        //Run child command
+        execvp(cmd.params[0], cmd.params);
+        perror("execvp");
+        exit(1);
+    } if(pid > 0) {
+        // Return the pipe out
+        return 0;
+    } else {
+        perror("fork");
+        return 1;
+    }
 }
