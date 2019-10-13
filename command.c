@@ -73,26 +73,29 @@ int checkOutRedirect(struct command *cmdPtr, char **inputPtr, int last) {
 }
 
 struct command constructCommand(char *cmdStr, int first, int last) {
+
     struct command cmd = initCommand();
+    char *cmdStrCpy = strdup(cmdStr);
+    char *param = strtok(cmdStrCpy, DELIMS);
+    int currParam = 0;
     int inRedirected;
     int outRedirected;
-
-    char *cmdStrCpy = strdup(cmdStr);
-
     cmd.errored = ERROR_F;
+    cmd.first = first;
+    cmd.last = last;
 
-    // Split input and place each argument (function and params) into struct
-    // Struct: [function, param1, param2, ... paramX, NULL]
-    int currParam = 0;
-    char *param = strtok(cmdStrCpy, DELIMS);
-
+    // Command-string level error
     if(strcmp(param,IN_REDIRECT) == 1 || strcmp(param, OUT_REDIRECT) == 1 || strcmp(param, BACKGROUND_COMMAND) == 1) {
         fprintf(stderr, "Error: missing command\n");
         cmd.errored = ERROR_T;
         return cmd;
     }
 
-    while(param != NULL) {
+    // Split input and place each argument (function and params) into struct
+    // Struct: [function, param1, param2, ... paramX, NULL]
+    while(param != NULL){
+
+        // Command-string level errors
         if(strcmp(param, BACKGROUND_COMMAND) == 1) {
             fprintf(stderr, "Error: mislocated background sign\n");
             cmd.errored = ERROR_T;
@@ -104,6 +107,7 @@ struct command constructCommand(char *cmdStr, int first, int last) {
             return cmd;
         }
 
+        // Input Redirection
         inRedirected = checkInRedirect(&cmd, &param, first);
         if(inRedirected == -1) {
             cmd.errored = ERROR_T;
@@ -114,6 +118,7 @@ struct command constructCommand(char *cmdStr, int first, int last) {
             continue;
         }
 
+        // Output Redirection
         outRedirected = checkOutRedirect(&cmd, &param, last);
         if(outRedirected == -1) {
             cmd.errored = ERROR_T;
@@ -132,23 +137,27 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     return cmd;
 }
 
-//Returns the PID of the child process.
-//Returns -1 if there was an error.
-pid_t runCommand(struct command cmd, int isPiped) {
-    pid_t pid;
+// Returns the PID of the child process.
+// Returns -1 if there was an error.
+int runCommand(struct command cmd, int* prevOut, int* prevIn, int* nextOut, int* nextIn){
+
+    // Construct next pipe
     int fd[2];
-
-    if(isPiped == 1){
-        if(pipe(fd) < 0) {
-            perror("pipe");
-            return -1;
-        }
+    if(pipe(fd) < 0) {
+        perror("pipe");
+        return -1;
     }
+    *nextOut = fd[0];
+    *nextIn = fd[1];
 
+    // Fork
+    pid_t pid;
     pid = fork();
+
+    // Child Process
     if(pid == 0) {
-        // Child Process
-        //Setup IO redirects/Piping
+
+        // Setup IO redirects/Piping
         if(cmd.inFile != NULL) {
             int inFile = open(cmd.inFile, O_RDONLY);
             dup2(inFile, STDIN_FILENO);
@@ -159,25 +168,31 @@ pid_t runCommand(struct command cmd, int isPiped) {
             dup2(outFile, STDOUT_FILENO);
             close(outFile);
         }
-        //Setup Pipe
-        if(isPiped == 1) {
-            dup2(fd[1], STDOUT_FILENO);
-            close(fd[0]);
-            close(fd[1]);
+
+        // Connect Pipes
+        if(cmd.first == 0){
+            dup2(*prevOut, STDIN_FILENO);
         }
-        //Run child command
+        if(cmd.last == 0){
+            dup2(*nextIn, STDOUT_FILENO);
+        }
+        close(fd[0]);
+        close(fd[1]);
+
+        // Run child command
         execvp(cmd.params[0], cmd.params);
         perror("execvp");
         exit(1);
+
+    // Parent Process
     } if(pid > 0) {
-        //Setup Pipe
-        if(isPiped == 1) {
-            dup2(fd[0], STDIN_FILENO);
-            close(fd[0]);
-            close(fd[1]);
-        }
-        // Return the pipe out
-        return pid;
+
+        // Setup Pipe
+        close(fd[0]);
+        close(fd[1]);
+
+        return 0;
+
     } else {
         perror("fork");
         return -1;

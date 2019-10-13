@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <zconf.h>
 
 #include "line.h"
 
@@ -13,6 +15,7 @@ struct line constructLine(char *input) {
     struct line myLine;
     memset(myLine.commandStrings, 0, sizeof(myLine.commandStrings));
     memset(myLine.commandStructures, 0, sizeof(myLine.commandStructures));
+    memset(myLine.pipeArray, 0, sizeof(myLine.pipeArray));
 
     char *inCopy = strdup(input);
     char* token;
@@ -36,10 +39,10 @@ struct line constructLine(char *input) {
         if(nextToken == NULL) last = 1;
         else last = 0;
 
-        //Construct the command
+        // Construct the command
         myLine.commandStructures[currCommand] = constructCommand(strdup(token), first, last);
 
-        //Check if errored out
+        // Check if errored out
         if(myLine.commandStructures[currCommand].errored == ERROR_T) {
             myLine.errored = ERROR_T;
             return myLine;
@@ -56,3 +59,37 @@ struct line constructLine(char *input) {
 
 }
 
+void runLine(struct line myLine){
+
+    // Iterate through each command in line
+    struct command* currentCommand = &(myLine.commandStructures[0]);
+    struct command* endPtr = &(myLine.commandStructures[0]) + 10;
+    int prevOutIndex = 0;
+    int prevInIndex = 1;
+    int nextOutIndex = 2;
+    int nextInIndex = 3;
+    while ( currentCommand < endPtr && currentCommand->params[0] != NULL){
+
+        runCommand(*currentCommand, &myLine.pipeArray[prevOutIndex], &myLine.pipeArray[prevInIndex],
+                   &myLine.pipeArray[nextOutIndex], &myLine.pipeArray[nextInIndex]);
+
+        // Increment
+        currentCommand++;
+        prevOutIndex ++;
+        prevInIndex++;
+        nextOutIndex++;
+        nextInIndex++;
+    }
+
+    // Read from Input
+    char inbuf[10];
+    memset(inbuf, 0, sizeof(inbuf));
+    read(*(myLine.pipeArray + 3), inbuf, 10);
+
+    char test[10];
+
+
+
+
+
+}

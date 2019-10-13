@@ -10,8 +10,11 @@ struct line {
     struct command commandStructures[10];
 
     int errored;
+
+    int pipeArray[22];
 };
 
 struct line constructLine(char *input);
+void runLine(struct line myLine);
 
 #endif
