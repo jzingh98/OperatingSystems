@@ -81,15 +81,11 @@ void runLine(struct line myLine){
         nextInIndex++;
     }
 
-    // Read from Input
+    // Test: try reading from last pipe
     char inbuf[10];
     memset(inbuf, 0, sizeof(inbuf));
     read(*(myLine.pipeArray + 3), inbuf, 10);
 
-    char test[10];
-
-
-
-
-
+    char* test = inbuf;
+    
 }
