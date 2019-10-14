@@ -166,11 +166,11 @@ int runCommand(struct command cmd, int* prevPipe, int* currPipe){
             dup2(prevPipe[0], STDIN_FILENO);
             close(prevPipe[1]);
         }
-        //if(cmd.last == 0){
+        if(cmd.last == 0){
             // If not the last command
             dup2(currPipe[1], STDOUT_FILENO);
             close(prevPipe[0]);
-        //}
+        }
 
 
         // Run child command

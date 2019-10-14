@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <zconf.h>
+#include <wait.h>
 
 #include "line.h"
 
@@ -61,6 +62,8 @@ struct line constructLine(char *input) {
 
 void runLine(struct line myLine){
 
+    int pid, status;
+
     // Initialize Pipes
     for (int i=0; i<11; i++)
     {
@@ -101,6 +104,8 @@ void runLine(struct line myLine){
     memset(inbuf, 0, sizeof(inbuf));
     read((myLine.pipeArray[commandIndex][0]), inbuf, 10);
 
-    char* test = inbuf;
+    while ((pid = wait(&status)) != -1)	/* pick up all the dead children */
+        fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
+
 
 }

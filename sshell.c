@@ -46,7 +46,7 @@ void simpleShell() {
     // Execute Line
     runLine(myLine);
 
-
+    simpleShell();
 }
 
 
