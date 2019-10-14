@@ -182,6 +182,7 @@ int runCommand(struct command cmd, int* prevPipe, int* currPipe){
 
     } if(pid > 0) {
         // Parent
+        return pid;
 
     } else {
         // Error
