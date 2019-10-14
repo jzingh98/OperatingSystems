@@ -139,16 +139,7 @@ struct command constructCommand(char *cmdStr, int first, int last) {
 
 // Returns the PID of the child process.
 // Returns -1 if there was an error.
-int runCommand(struct command cmd, int* prevOut, int* prevIn, int* nextOut, int* nextIn){
-
-    // Construct next pipe
-    int fd[2];
-    if(pipe(fd) < 0) {
-        perror("pipe");
-        return -1;
-    }
-    *nextOut = fd[0];
-    *nextIn = fd[1];
+int runCommand(struct command cmd, int* prevPipe, int* currPipe){
 
     // Fork
     pid_t pid;
@@ -171,29 +162,29 @@ int runCommand(struct command cmd, int* prevOut, int* prevIn, int* nextOut, int*
 
         // Connect Pipes
         if(cmd.first == 0){
-            dup2(*prevOut, STDIN_FILENO);
+            // If not the first command
+            dup2(prevPipe[0], STDIN_FILENO);
+            close(prevPipe[1]);
         }
-        if(cmd.last == 0){
-            dup2(*nextIn, STDOUT_FILENO);
-        }
-        close(fd[0]);
-        close(fd[1]);
+        //if(cmd.last == 0){
+            // If not the last command
+            dup2(currPipe[1], STDOUT_FILENO);
+            close(prevPipe[0]);
+        //}
+
 
         // Run child command
         execvp(cmd.params[0], cmd.params);
         perror("execvp");
         exit(1);
 
-    // Parent Process
+
+
     } if(pid > 0) {
-
-        // Setup Pipe
-        close(fd[0]);
-        close(fd[1]);
-
-        return 0;
+        // Parent
 
     } else {
+        // Error
         perror("fork");
         return -1;
     }

@@ -11,10 +11,11 @@ struct line {
 
     int errored;
 
-    int pipeArray[22];
+    int pipeArray[11][2];
 };
 
 struct line constructLine(char *input);
 void runLine(struct line myLine);
 
 #endif
+

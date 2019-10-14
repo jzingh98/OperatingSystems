@@ -50,6 +50,12 @@ void simpleShell() {
 }
 
 
-// echo toto | tr o i
+/*
 
+
+echo toto | tr o i
+
+
+
+ */
 

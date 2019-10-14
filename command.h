@@ -14,6 +14,6 @@ struct command {
 
 struct command constructCommand(char *input, int first, int last);
 
-int runCommand(struct command cmd, int* prevOut, int* prevIn, int* nextOut, int* nextIn);
+int runCommand(struct command cmd, int* prevPipe, int* currPipe);
 
 #endif

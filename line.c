@@ -61,31 +61,46 @@ struct line constructLine(char *input) {
 
 void runLine(struct line myLine){
 
+    // Initialize Pipes
+    for (int i=0; i<11; i++)
+    {
+        int pipeStatus = pipe(myLine.pipeArray[i]);
+        if(pipeStatus < 0) {
+            perror("pipe");
+            // return -1;
+        }
+    }
+
+
     // Iterate through each command in line
     struct command* currentCommand = &(myLine.commandStructures[0]);
     struct command* endPtr = &(myLine.commandStructures[0]) + 10;
-    int prevOutIndex = 0;
-    int prevInIndex = 1;
-    int nextOutIndex = 2;
-    int nextInIndex = 3;
+    int commandIndex = 0;
+    int nextCmdIndex = 1;
     while ( currentCommand < endPtr && currentCommand->params[0] != NULL){
 
-        runCommand(*currentCommand, &myLine.pipeArray[prevOutIndex], &myLine.pipeArray[prevInIndex],
-                   &myLine.pipeArray[nextOutIndex], &myLine.pipeArray[nextInIndex]);
+        // Run current command
+        runCommand(*currentCommand, myLine.pipeArray[commandIndex], myLine.pipeArray[nextCmdIndex]);
+
+        // Close current pipe
+        close(myLine.pipeArray[commandIndex][0]);
+        close(myLine.pipeArray[commandIndex][1]);
 
         // Increment
         currentCommand++;
-        prevOutIndex ++;
-        prevInIndex++;
-        nextOutIndex++;
-        nextInIndex++;
+        commandIndex ++;
+        nextCmdIndex ++;
     }
+
+    // Close current pipe
+    // (myLine.pipeArray[commandIndex][0]);
+    close(myLine.pipeArray[commandIndex][1]);
 
     // Test: try reading from last pipe
     char inbuf[10];
     memset(inbuf, 0, sizeof(inbuf));
-    read(*(myLine.pipeArray + 3), inbuf, 10);
+    read((myLine.pipeArray[commandIndex][0]), inbuf, 10);
 
     char* test = inbuf;
-    
+
 }
