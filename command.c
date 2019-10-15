@@ -81,8 +81,6 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     int inRedirected;
     int outRedirected;
     cmd.errored = ERROR_F;
-    cmd.first = first;
-    cmd.last = last;
 
     // Command-string level error
     if(strcmp(param,IN_REDIRECT) == 1 || strcmp(param, OUT_REDIRECT) == 1 || strcmp(param, BACKGROUND_COMMAND) == 1) {
@@ -139,38 +137,13 @@ struct command constructCommand(char *cmdStr, int first, int last) {
 
 // Returns the PID of the child process.
 // Returns -1 if there was an error.
-int runCommand(struct command cmd, int* prevPipe, int* currPipe){
-
-    // Check Built In Commands
-    // EXIT
-    if (strcmp(cmd.params[0], "exit") == 0){
-        fprintf(stderr, "Bye...");
-        exit(0);
-    }
-    // CD
-    if (strcmp(cmd.params[0], "cd") == 0){
-        if (chdir(cmd.params[1]) == -1) {
-            fprintf(stderr,"Error: no such directory\n");
-        }
-        // Return special pid value
-        return 999;
-    }
-    // PWD
-    if (strcmp(cmd.params[0], "pwd") == 0){
-        char* directory = (char *)malloc(100 * sizeof(char));
-        getcwd(directory, 100);
-        fprintf(stdout,"%s\n", directory);
-        return 999;
-    }
-
-
+pid_t runCommand(struct command cmd, int* prevPipe, int* currPipe){
     // Fork
     pid_t pid;
     pid = fork();
 
     // Child Process
     if(pid == 0) {
-
         // Setup IO redirects/Piping
         if(cmd.inFile != NULL) {
             int inFile = open(cmd.inFile, O_RDONLY);
@@ -197,6 +170,23 @@ int runCommand(struct command cmd, int* prevPipe, int* currPipe){
             close(currPipe[1]);
         }
 
+        // Check Built In Commands
+        // CD
+        if (strcmp(cmd.params[0], "cd") == 0){
+            if (chdir(cmd.params[1]) == -1) {
+                fprintf(stderr,"Error: no such directory\n");
+            }
+            // Return special pid value
+            exit(0);
+        }
+        // PWD
+        if (strcmp(cmd.params[0], "pwd") == 0){
+            char* directory = (char *)malloc(100 * sizeof(char));
+            getcwd(directory, 100);
+            fprintf(stdout,"%s\n", directory);
+            exit(0);
+        }
+
         // Run child command
         execvp(cmd.params[0], cmd.params);
         perror("execvp");
@@ -217,6 +207,6 @@ int runCommand(struct command cmd, int* prevPipe, int* currPipe){
     } else {
         // Error
         perror("fork");
-        return -1;
+        exit(1);
     }
 }

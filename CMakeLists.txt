@@ -3,4 +3,4 @@ project(Project1 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Project1 sshell.c command.h command.c line.h line.c)
+add_executable(Project1 sshell.c command.h command.c line.h line.c processes.c processes.h)

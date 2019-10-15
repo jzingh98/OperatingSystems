@@ -8,12 +8,10 @@ struct command {
     char *inFile;
     char *outFile;
     int errored;
-    int first;
-    int last;
 };
 
 struct command constructCommand(char *input, int first, int last);
 
-int runCommand(struct command cmd, int* prevPipe, int* currPipe);
+pid_t runCommand(struct command cmd, int* prevPipe, int* currPipe);
 
 #endif

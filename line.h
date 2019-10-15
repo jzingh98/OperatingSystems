@@ -9,7 +9,7 @@ struct line {
 
     struct command commandStructures[10];
 
-    int pidArray[10];
+    pid_t pidArray[10];
 
     int statusArray[10];
 
@@ -21,7 +21,7 @@ struct line {
 };
 
 struct line constructLine(char *input);
-int runLine(struct line myLine);
+int runLine(struct line *myLine);
 char* concat(const char *s1, const char *s2);
 
 #endif

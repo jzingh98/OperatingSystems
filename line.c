@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <zconf.h>
-#include <wait.h>
 
 #include "line.h"
 
@@ -28,6 +27,10 @@ struct line constructLine(char *input) {
     memset(myLine.commandStructures, 0, sizeof(myLine.commandStructures));
     memset(myLine.pidArray, 0, sizeof(myLine.pidArray));
     memset(myLine.statusArray, 0, sizeof(myLine.statusArray));
+
+    myLine.backgrounded = 0;
+    myLine.errored = 0;
+    myLine.numCommands = -1;
 
     char *inCopy = strdup(input);
     char* token;
@@ -83,59 +86,60 @@ struct line constructLine(char *input) {
 
 }
 
-int runLine(struct line myLine){
+int runLine(struct line *myLine){
     int prevPipe[2];
     int currPipe[2];
 
     // Keeps track of pid and status arrays
     int currentCommandIndex = 0;
 
-    struct command currCommand = myLine.commandStructures[0];
+    struct command currCommand = myLine->commandStructures[0];
 
-    if(myLine.numCommands == 1) {
+    if(myLine->numCommands == 1) {
         // TODO: Change return type to string
-        myLine.pidArray[currentCommandIndex] = runCommand(currCommand, NULL, NULL);
+        myLine->pidArray[currentCommandIndex] = runCommand(currCommand, NULL, NULL);
+        myLine->pidArray[currentCommandIndex + 1] = -1;
         return 0;
     }
 
     if(pipe(currPipe) < 0) {
         perror("pipe");
         // TODO: Change return type to string
-        return -1;
+        return 1;
     }
 
-    myLine.pidArray[currentCommandIndex] = runCommand(currCommand, NULL, currPipe);
+    myLine->pidArray[currentCommandIndex] = runCommand(currCommand, NULL, currPipe);
     currentCommandIndex++;
 
     prevPipe[0] = currPipe[0];
     prevPipe[1] = currPipe[1];
 
-    for(int i = 1; i < myLine.numCommands - 1; i++){
-        currCommand = myLine.commandStructures[i];
+    for(int i = 1; i < myLine->numCommands - 1; i++){
+        currCommand = myLine->commandStructures[i];
 
         if(pipe(currPipe) < 0) {
             perror("pipe");
             // TODO: Change return type to string
-            return -1;
+            return 1;
         }
 
-        myLine.pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, currPipe);
+        myLine->pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, currPipe);
         currentCommandIndex++;
 
         prevPipe[0] = currPipe[0];
         prevPipe[1] = currPipe[1];
     }
 
-    currCommand = myLine.commandStructures[myLine.numCommands - 1];
+    currCommand = myLine->commandStructures[myLine->numCommands - 1];
 
     if(pipe(currPipe) < 0) {
         perror("pipe");
         // TODO: Change return type to string
-        return -1;
+        return 1;
     }
 
-    myLine.pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, NULL);
-
+    myLine->pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, NULL);
+    myLine->pidArray[currentCommandIndex + 1] = -1;
     // TODO: Change return type to string
     return 0;
 
