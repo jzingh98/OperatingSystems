@@ -141,6 +141,29 @@ struct command constructCommand(char *cmdStr, int first, int last) {
 // Returns -1 if there was an error.
 int runCommand(struct command cmd, int* prevPipe, int* currPipe){
 
+    // Check Built In Commands
+    // EXIT
+    if (strcmp(cmd.params[0], "exit") == 0){
+        fprintf(stderr, "Bye...");
+        exit(0);
+    }
+    // CD
+    if (strcmp(cmd.params[0], "cd") == 0){
+        if (chdir(cmd.params[1]) == -1) {
+            fprintf(stderr,"Error: no such directory\n");
+        }
+        // Return special pid value
+        return 999;
+    }
+    // PWD
+    if (strcmp(cmd.params[0], "pwd") == 0){
+        char* directory = (char *)malloc(100 * sizeof(char));
+        getcwd(directory, 100);
+        fprintf(stdout,"%s\n", directory);
+        return 999;
+    }
+
+
     // Fork
     pid_t pid;
     pid = fork();
@@ -173,7 +196,6 @@ int runCommand(struct command cmd, int* prevPipe, int* currPipe){
             dup2(currPipe[1], STDOUT_FILENO);
             close(currPipe[1]);
         }
-
 
         // Run child command
         execvp(cmd.params[0], cmd.params);

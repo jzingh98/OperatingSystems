@@ -51,9 +51,9 @@ void simpleShell() {
 
     waitpid(pid, &status, 0);
 
+
     fprintf(stderr, "+ completed '%s' [%d]\n", input, WEXITSTATUS(status));
     sleep(1);
-    //+ completed 'echo Hello world! | grep Hello|wc -l' [0][0][0]
 
     simpleShell();
 }
