@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <wait.h>
 
 #include "command.h"
 #include "line.h"
@@ -50,6 +51,10 @@ void simpleShell() {
 
     waitpid(pid, &status, 0);
 
+
+    fprintf(stderr, "+ completed '%s' [%d]\n", input, WEXITSTATUS(status));
+    sleep(1);
+
     simpleShell();
 }
 
@@ -58,7 +63,6 @@ void simpleShell() {
 
 
 echo toto | tr o i
-
 
 
  */

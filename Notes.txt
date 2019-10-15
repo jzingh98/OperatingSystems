@@ -5,7 +5,6 @@ __________________________________________________
 
 ----- PHASE 1 ------------------------------------
 
-
 Done.
 
 __________________________________________________
@@ -14,44 +13,47 @@ __________________________________________________
 
 Able to read individual arguments from command line.
 
-TODO: Error management
+Some errors display properly, others do not.
+
+TODO: Fix error management
 
 __________________________________________________
 
 ----- PHASE 3 ------------------------------------
 
-Able to read arguments for functions.
-Parses arguments with space as delimiter
+Done.
 
 __________________________________________________
 
 ----- PHASE 4 ------------------------------------
 
-TODO: Built in commands: exit, cd, pwd
+Done.
 
 __________________________________________________
 
 ----- PHASE 5 ------------------------------------
 
-TODO: Input Redirection
+Done.
 
 __________________________________________________
 
 ----- PHASE 6 ------------------------------------
 
-TODO: Output Redirection
+Done.
 
 __________________________________________________
 
 ----- PHASE 7 ------------------------------------
 
-Line structure in progress.
+Piping implemented.
 
-TODO: Pipeline Commands
+TODO: Status of every command needs to be printed
 
 __________________________________________________
 
 ----- PHASE 8 ------------------------------------
+
+Able to parse & character
 
 TODO: Background Processes
 
