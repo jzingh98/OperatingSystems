@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <wait.h>
 
 #include "command.h"
 #include "line.h"
@@ -58,7 +59,6 @@ void simpleShell() {
 
 
 echo toto | tr o i
-
 
 
  */
