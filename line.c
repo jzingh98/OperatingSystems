@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <zconf.h>
+#include <wait.h>
 
 #include "line.h"
 
@@ -25,6 +26,8 @@ struct line constructLine(char *input) {
     struct line myLine;
     memset(myLine.commandStrings, 0, sizeof(myLine.commandStrings));
     memset(myLine.commandStructures, 0, sizeof(myLine.commandStructures));
+    memset(myLine.pidArray, 0, sizeof(myLine.pidArray));
+    memset(myLine.statusArray, 0, sizeof(myLine.statusArray));
 
     char *inCopy = strdup(input);
     char* token;
@@ -84,18 +87,25 @@ int runLine(struct line myLine){
     int prevPipe[2];
     int currPipe[2];
 
+    // Keeps track of pid and status arrays
+    int currentCommandIndex = 0;
+
     struct command currCommand = myLine.commandStructures[0];
 
     if(myLine.numCommands == 1) {
-        return runCommand(currCommand, NULL, NULL);
+        // TODO: Change return type to string
+        myLine.pidArray[currentCommandIndex] = runCommand(currCommand, NULL, NULL);
+        return 0;
     }
 
     if(pipe(currPipe) < 0) {
         perror("pipe");
+        // TODO: Change return type to string
         return -1;
     }
 
-    runCommand(currCommand, NULL, currPipe);
+    myLine.pidArray[currentCommandIndex] = runCommand(currCommand, NULL, currPipe);
+    currentCommandIndex++;
 
     prevPipe[0] = currPipe[0];
     prevPipe[1] = currPipe[1];
@@ -105,10 +115,12 @@ int runLine(struct line myLine){
 
         if(pipe(currPipe) < 0) {
             perror("pipe");
+            // TODO: Change return type to string
             return -1;
         }
 
-        runCommand(currCommand, prevPipe, currPipe);
+        myLine.pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, currPipe);
+        currentCommandIndex++;
 
         prevPipe[0] = currPipe[0];
         prevPipe[1] = currPipe[1];
@@ -118,8 +130,22 @@ int runLine(struct line myLine){
 
     if(pipe(currPipe) < 0) {
         perror("pipe");
+        // TODO: Change return type to string
         return -1;
     }
 
-    return runCommand(currCommand, prevPipe, NULL);
+    myLine.pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, NULL);
+
+    // TODO: Change return type to string
+    return 0;
+
+}
+
+char* concat(const char *s1, const char *s2)
+{
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
 }
