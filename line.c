@@ -15,7 +15,6 @@ struct line constructLine(char *input) {
     struct line myLine;
     memset(myLine.commandStrings, 0, sizeof(myLine.commandStrings));
     memset(myLine.commandStructures, 0, sizeof(myLine.commandStructures));
-    memset(myLine.pipeArray, 0, sizeof(myLine.pipeArray));
 
     char *inCopy = strdup(input);
     char* token;
@@ -52,6 +51,8 @@ struct line constructLine(char *input) {
         nextToken = strtok_r(rest, DELIMS, &rest);
         currCommand++;
     }
+    myLine.numCommands = currCommand;
+
     myLine.commandStrings[currCommand + 1] = NULL;
 
     myLine.errored = ERROR_F;
@@ -60,15 +61,12 @@ struct line constructLine(char *input) {
 }
 
 int runLine(struct line myLine){
-
-    int pid, status;
-
     int prevPipe[2];
     int currPipe[2];
 
     struct command currCommand = myLine.commandStructures[0];
 
-    if(myLine.commandStrings[1] == NULL) {
+    if(myLine.numCommands == 1) {
         return runCommand(currCommand, NULL, NULL);
     }
 
@@ -77,63 +75,31 @@ int runLine(struct line myLine){
         return -1;
     }
 
-    pid = runCommand(currCommand, NULL, currPipe);
+    runCommand(currCommand, NULL, currPipe);
 
     prevPipe[0] = currPipe[0];
     prevPipe[1] = currPipe[1];
 
-    for(int i = 1; myLine.commandStrings[i] != NULL; i++){
+    for(int i = 1; i < myLine.numCommands - 1; i++){
         currCommand = myLine.commandStructures[i];
-
-        if(myLine.commandStrings[i+1] == NULL) {
-            return runCommand(currCommand, prevPipe, NULL);
-        }
 
         if(pipe(currPipe) < 0) {
             perror("pipe");
             return -1;
         }
 
-        pid = runCommand(currCommand, prevPipe, currPipe);
+        runCommand(currCommand, prevPipe, currPipe);
 
         prevPipe[0] = currPipe[0];
         prevPipe[1] = currPipe[1];
     }
 
-    return pid;
+    currCommand = myLine.commandStructures[myLine.numCommands - 1];
 
-
-    // Iterate through each command in line
-    struct command* currentCommand = &(myLine.commandStructures[0]);
-    struct command* endPtr = &(myLine.commandStructures[0]) + 10;
-    int commandIndex = 0;
-    int nextCmdIndex = 1;
-    while ( currentCommand < endPtr && currentCommand->params[0] != NULL){
-
-        // Run current command
-        runCommand(*currentCommand, myLine.pipeArray[commandIndex], myLine.pipeArray[nextCmdIndex]);
-
-        // Close current pipe
-        close(myLine.pipeArray[commandIndex][0]);
-        close(myLine.pipeArray[commandIndex][1]);
-
-        // Increment
-        currentCommand++;
-        commandIndex ++;
-        nextCmdIndex ++;
+    if(pipe(currPipe) < 0) {
+        perror("pipe");
+        return -1;
     }
 
-    // Close current pipe
-    // (myLine.pipeArray[commandIndex][0]);
-    close(myLine.pipeArray[commandIndex][1]);
-
-    // Test: try reading from last pipe
-    char inbuf[10];
-    memset(inbuf, 0, sizeof(inbuf));
-    read((myLine.pipeArray[commandIndex][0]), inbuf, 10);
-
-    while ((pid = wait(&status)) != -1)	/* pick up all the dead children */
-        fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
-
-
+    return runCommand(currCommand, prevPipe, NULL);
 }

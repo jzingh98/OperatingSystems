@@ -11,6 +11,8 @@ struct line {
 
     int errored;
 
+    int numCommands;
+
     int pipeArray[11][2];
 };
 
