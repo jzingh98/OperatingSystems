@@ -49,6 +49,7 @@ void simpleShell() {
         return;
     }
 
+    // TODO: all status gathering will be done in Line. Sshell receives and prints string
     waitpid(pid, &status, 0);
 
 
