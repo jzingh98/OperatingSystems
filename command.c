@@ -96,7 +96,7 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     while(param != NULL){
 
         // Command-string level errors
-        if(strcmp(param, BACKGROUND_COMMAND) == 1) {
+        if(last == 0 && strchr(param, '&') != NULL) {
             fprintf(stderr, "Error: mislocated background sign\n");
             cmd.errored = ERROR_T;
             return cmd;

@@ -9,6 +9,16 @@
 #define ERROR_T 1
 #define ERROR_F 0
 
+int lastNonWhite(char *str) {
+    int lastNonWhitespace = -1;
+    for (int i = 0; i < strlen(str); i++) {
+        if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n') {
+            lastNonWhitespace = i;
+        }
+    }
+    return lastNonWhitespace;
+}
+
 struct line constructLine(char *input) {
 
     // Initialize Struct
@@ -38,8 +48,18 @@ struct line constructLine(char *input) {
         if(nextToken == NULL) last = 1;
         else last = 0;
 
+        //Check to see if the command should be backgrounded
+        if(last == 1) {
+            int posLastNonWhite = lastNonWhite(token);
+            if(posLastNonWhite != -1 && token[posLastNonWhite] == '&'){
+                myLine.backgrounded = 1;
+                token[posLastNonWhite] = '\0';
+            }
+        }
+
         // Construct the command
         myLine.commandStructures[currCommand] = constructCommand(strdup(token), first, last);
+
 
         // Check if errored out
         if(myLine.commandStructures[currCommand].errored == ERROR_T) {

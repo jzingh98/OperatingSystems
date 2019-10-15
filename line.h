@@ -11,9 +11,9 @@ struct line {
 
     int errored;
 
-    int numCommands;
+    int backgrounded;
 
-    int pipeArray[11][2];
+    int numCommands;
 };
 
 struct line constructLine(char *input);
