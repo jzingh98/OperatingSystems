@@ -15,7 +15,7 @@ struct line {
 };
 
 struct line constructLine(char *input);
-void runLine(struct line myLine);
+int runLine(struct line myLine);
 
 #endif
 

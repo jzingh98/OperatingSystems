@@ -161,15 +161,17 @@ int runCommand(struct command cmd, int* prevPipe, int* currPipe){
         }
 
         // Connect Pipes
-        if(cmd.first == 0){
+        if(prevPipe != NULL){
             // If not the first command
-            dup2(prevPipe[0], STDIN_FILENO);
             close(prevPipe[1]);
-        }
-        if(cmd.last == 0){
-            // If not the last command
-            dup2(currPipe[1], STDOUT_FILENO);
+            dup2(prevPipe[0], STDIN_FILENO);
             close(prevPipe[0]);
+        }
+        if(currPipe != NULL){
+            // If not the last command
+            close(currPipe[0]);
+            dup2(currPipe[1], STDOUT_FILENO);
+            close(currPipe[1]);
         }
 
 
@@ -182,6 +184,12 @@ int runCommand(struct command cmd, int* prevPipe, int* currPipe){
 
     } if(pid > 0) {
         // Parent
+        // Close finished pipes before returning
+        if(prevPipe != NULL){
+            // If not the first command
+            close(prevPipe[0]);
+            close(prevPipe[1]);
+        }
         return pid;
 
     } else {

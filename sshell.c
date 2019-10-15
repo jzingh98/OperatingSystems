@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <wait.h>
 
 #include "command.h"
 #include "line.h"
@@ -28,11 +27,11 @@ void simpleShell() {
     size_t len = MAX_INPUT_LEN;
 
     // Data Structures
-    struct command cmd;
     struct line myLine;
 
     // Other Variables
     pid_t pid;
+    int status;
 
     // Get User Input
     fprintf(stdout, "sshell$ ");
@@ -41,10 +40,15 @@ void simpleShell() {
 
     // Construct Line
     myLine = constructLine(input);
-    cmd = myLine.commandStructures[1];
 
     // Execute Line
-    runLine(myLine);
+    pid = runLine(myLine);
+
+    if(myLine.errored == 1){
+        return;
+    }
+
+    waitpid(pid, &status, 0);
 
     simpleShell();
 }

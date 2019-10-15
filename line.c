@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <zconf.h>
-#include <wait.h>
 
 #include "line.h"
 
@@ -60,19 +59,48 @@ struct line constructLine(char *input) {
 
 }
 
-void runLine(struct line myLine){
+int runLine(struct line myLine){
 
     int pid, status;
 
-    // Initialize Pipes
-    for (int i=0; i<11; i++)
-    {
-        int pipeStatus = pipe(myLine.pipeArray[i]);
-        if(pipeStatus < 0) {
-            perror("pipe");
-            // return -1;
-        }
+    int prevPipe[2];
+    int currPipe[2];
+
+    struct command currCommand = myLine.commandStructures[0];
+
+    if(myLine.commandStrings[1] == NULL) {
+        return runCommand(currCommand, NULL, NULL);
     }
+
+    if(pipe(currPipe) < 0) {
+        perror("pipe");
+        return -1;
+    }
+
+    pid = runCommand(currCommand, NULL, currPipe);
+
+    prevPipe[0] = currPipe[0];
+    prevPipe[1] = currPipe[1];
+
+    for(int i = 1; myLine.commandStrings[i] != NULL; i++){
+        currCommand = myLine.commandStructures[i];
+
+        if(myLine.commandStrings[i+1] == NULL) {
+            return runCommand(currCommand, prevPipe, NULL);
+        }
+
+        if(pipe(currPipe) < 0) {
+            perror("pipe");
+            return -1;
+        }
+
+        pid = runCommand(currCommand, prevPipe, currPipe);
+
+        prevPipe[0] = currPipe[0];
+        prevPipe[1] = currPipe[1];
+    }
+
+    return pid;
 
 
     // Iterate through each command in line
