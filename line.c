@@ -74,7 +74,8 @@ int runLine(struct line myLine){
 
     if(myLine.numCommands == 1) {
         // TODO: Change return type to string
-        return runCommand(currCommand, NULL, NULL);
+        myLine.pidArray[currentCommandIndex] = runCommand(currCommand, NULL, NULL);
+        return 0;
     }
 
     if(pipe(currPipe) < 0) {
@@ -115,21 +116,8 @@ int runLine(struct line myLine){
 
     myLine.pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, NULL);
 
-    // Collect status values
-    char* returnString = "";
-    for(int i = 1; i < myLine.numCommands - 1; i++){
-        waitpid(myLine.pidArray[i], &myLine.statusArray[i], 0);
-        char str[8];
-        snprintf(str, 8, "%d", myLine.statusArray[i]);
-        returnString = concat(returnString, "[");
-        returnString = concat(returnString, str);
-        returnString = concat(returnString, "]");
-    }
-
-    fprintf(stdout, "%s", returnString);
-
     // TODO: Change return type to string
-    return myLine.pidArray[currentCommandIndex];
+    return 0;
 
 }
 
