@@ -105,6 +105,8 @@ void simpleShell() {
             unfinishedProcesses = printAllCompletedProcesses(newProcess, unfinishedProcesses);
             free(newProcess);
         }
+
+        deconstructLine(&myLine);
     }
     return;
 }

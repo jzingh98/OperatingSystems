@@ -205,3 +205,10 @@ pid_t runCommand(struct command cmd, int* prevPipe, int* currPipe){
         exit(1);
     }
 }
+
+void deconstructCommand(struct command *cmdPtr) {
+    free(cmdPtr->params);
+    free(cmdPtr->inFile);
+    free(cmdPtr->outFile);
+
+}

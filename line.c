@@ -143,3 +143,16 @@ int runLine(struct line *myLine){
     return 0;
 
 }
+
+void deconstructLine(struct line *myLine){
+
+    for(int i = 1; i < myLine->numCommands - 1; i++){
+        currCommand = myLine->commandStructures[i];
+        deconstructCommand(currCommand);
+    }
+
+    free(myLine->commandStrings);
+    free(myLine->pidArray);
+    free(myLine->statusArray);
+
+}

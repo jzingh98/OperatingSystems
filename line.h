@@ -21,6 +21,7 @@ struct line {
 char *removeTrailingLeadingWhitespace(char *str);
 struct line constructLine(char *input);
 int runLine(struct line *myLine);
+void deconstructLine(struct line *myLine);
 
 #endif
 

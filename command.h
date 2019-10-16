@@ -12,7 +12,7 @@ struct command {
 };
 
 struct command constructCommand(char *input, int first, int last);
-
+void deconstructCommand(struct command *cmdPtr);
 pid_t runCommand(struct command cmd, int* prevPipe, int* currPipe);
 
 #endif
