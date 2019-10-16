@@ -62,7 +62,7 @@ void simpleShell() {
         }
 
         // Execute Line
-        status = runLine(&myLine);
+        if(runLine(&myLine) == 1) exit(1);
 
         //Create new processes node struct
         struct process_node *newProcess = (struct process_node*) malloc(sizeof(struct process_node));
