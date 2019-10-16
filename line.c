@@ -153,6 +153,4 @@ void deconstructLine(struct line *myLine){
     }
 
     free(myLine->pidArray);
-    free(myLine->statusArray);
-
 }

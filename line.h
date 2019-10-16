@@ -9,8 +9,6 @@ struct line {
 
     pid_t *pidArray;
 
-    int *statusArray;
-
     int errored;
 
     int backgrounded;
