@@ -40,6 +40,8 @@ void simpleShell() {
         }
         strtok(input, "\n");
 
+        //TODO: check if all spaces
+
         // Construct Line
         myLine = constructLine(input);
 

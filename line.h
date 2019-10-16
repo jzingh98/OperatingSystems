@@ -5,13 +5,11 @@
 
 struct line {
 
-    char *commandStrings[10];
+    struct command *commandStructures;
 
-    struct command commandStructures[10];
+    pid_t *pidArray;
 
-    pid_t pidArray[10];
-
-    int statusArray[10];
+    int *statusArray;
 
     int errored;
 

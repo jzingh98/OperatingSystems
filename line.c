@@ -9,109 +9,118 @@
 #define ERROR_T 1
 #define ERROR_F 0
 
-int lastNonWhite(char *str) {
+char *removeTrailingLeadingWhitespace(char *str){
+    //Check if empty
+    if(str[0] == '\0') return str;
+
+    //trim leading whitespace
+    while(str[0] == ' ' || str[0] == '\t') str++;
+
+    //Check if was all whitespace
+    if(str[0] == '\0') return str;
+
+    //trim trailing whitespace
     int lastNonWhitespace = -1;
     for (int i = 0; i < strlen(str); i++) {
-        if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n') {
+        if (str[i] == ' ' && str[i] == '\t' && str[i] == '\n') {
             lastNonWhitespace = i;
         }
     }
-    return lastNonWhitespace;
+    if(lastNonWhitespace != -1) str[lastNonWhitespace] = '\0';
+    return str;
 }
 
 struct line constructLine(char *input) {
+    int numCommands = 1;
+    for (int i=0; i < strlen(input); i++){
+       if(input[i] == '|') numCommands++;
+    }
 
     // Initialize Struct
     struct line myLine;
-    memset(myLine.commandStrings, 0, sizeof(myLine.commandStrings));
-    memset(myLine.commandStructures, 0, sizeof(myLine.commandStructures));
-    memset(myLine.pidArray, 0, sizeof(myLine.pidArray));
-    memset(myLine.statusArray, 0, sizeof(myLine.statusArray));
+    myLine.numCommands = numCommands;
+    myLine.commandStructures = (struct command *)malloc(numCommands* sizeof(struct command));
+    myLine.pidArray = (pid_t *)malloc(numCommands* sizeof(pid_t));
 
     myLine.backgrounded = 0;
     myLine.errored = 0;
-    myLine.numCommands = -1;
 
-    char *inCopy = strdup(input);
-    char* token;
-    char* nextToken;
-    char* rest = inCopy;
-    int first;
-    int last;
+    char *inputCopy = strdup(input);
+    char* currCmdStr;
+    int first = 1;
+    int last = 0;
 
     // Split input and place each individual command into struct
     // Struct: [command1, command2, ... commandX, NULL]
-    int currCommand = 0;
-    token = strtok_r(rest, DELIMS, &rest);
-    nextToken = strtok_r(rest, DELIMS, &rest);
-    while (token != NULL) {
-        // Create new command with current token
-        myLine.commandStrings[currCommand] = strdup(token);
-
-        // Check if first or last command in the line
-        if(currCommand == 0) first = 1;
-        else first = 0;
-        if(nextToken == NULL) last = 1;
-        else last = 0;
-
-        //trim leading whitespace
-        while(token[0] == ' ' || token[0] == '\t') token++;
-        //Check to see if the command should be backgrounded
-        if(last == 1) {
-            int posLastNonWhite = lastNonWhite(token);
-            if(posLastNonWhite != -1 && token[posLastNonWhite] == '&'){
-                myLine.backgrounded = 1;
-                token[posLastNonWhite] = '\0';
-            }
-        }
-
-        // Construct the command
-        myLine.commandStructures[currCommand] = constructCommand(strdup(token), first, last);
 
 
-        // Check if errored out
-        if(myLine.commandStructures[currCommand].errored == ERROR_T) {
+    for(int i = 0; i < myLine.numCommands; i++){
+        //check if on last command
+        if(i == numCommands-1) last = 1;
+
+        //get the next command string
+        currCmdStr = strtok_r(inputCopy, DELIMS, &inputCopy);
+        if(currCmdStr == NULL){
+            fprintf(stderr, "Error: missing command\n");
             myLine.errored = ERROR_T;
             return myLine;
         }
-        // Update token
-        token = nextToken;
-        nextToken = strtok_r(rest, DELIMS, &rest);
-        currCommand++;
-    }
-    myLine.numCommands = currCommand;
+        currCmdStr = removeTrailingLeadingWhitespace(currCmdStr);
 
-    myLine.commandStrings[currCommand + 1] = NULL;
+        //If the current command is empty then we are missing a command
+        if(currCmdStr[0] == '\0'){
+            fprintf(stderr, "Error: missing command\n");
+            myLine.errored = ERROR_T;
+            return myLine;
+        }
+
+        //Check if command should be backgrounded
+        if(last && currCmdStr[strlen(currCmdStr)-1] == '&'){
+            myLine.backgrounded = 1;
+            currCmdStr[strlen(currCmdStr)-1] = '\0';
+        }
+
+        //If the current command is empty then we are missing a command
+        if(currCmdStr[0] == '\0'){
+            fprintf(stderr, "Error: missing command\n");
+            myLine.errored = ERROR_T;
+            return myLine;
+        }
+
+        // Construct the command
+        myLine.commandStructures[i] = constructCommand(strdup(currCmdStr), first, last);
+
+
+        // Check if errored out
+        if(myLine.commandStructures[0].errored == ERROR_T) {
+            myLine.errored = ERROR_T;
+            return myLine;
+        }
+
+        first = 0;
+    }
 
     myLine.errored = ERROR_F;
     return myLine;
-
 }
 
 int runLine(struct line *myLine){
     int prevPipe[2];
     int currPipe[2];
 
-    // Keeps track of pid and status arrays
-    int currentCommandIndex = 0;
-
     struct command currCommand = myLine->commandStructures[0];
 
     if(myLine->numCommands == 1) {
-        // TODO: Change return type to string
-        myLine->pidArray[currentCommandIndex] = runCommand(currCommand, NULL, NULL);
-        myLine->pidArray[currentCommandIndex + 1] = -1;
+        myLine->pidArray[0] = runCommand(currCommand, NULL, NULL);
         return 0;
     }
 
     if(pipe(currPipe) < 0) {
         perror("pipe");
-        // TODO: Change return type to string
         return 1;
     }
 
-    myLine->pidArray[currentCommandIndex] = runCommand(currCommand, NULL, currPipe);
-    currentCommandIndex++;
+    myLine->pidArray[0] = runCommand(currCommand, NULL, currPipe);
 
     prevPipe[0] = currPipe[0];
     prevPipe[1] = currPipe[1];
@@ -125,24 +134,14 @@ int runLine(struct line *myLine){
             return 1;
         }
 
-        myLine->pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, currPipe);
-        currentCommandIndex++;
+        myLine->pidArray[i] = runCommand(currCommand, prevPipe, currPipe);
 
         prevPipe[0] = currPipe[0];
         prevPipe[1] = currPipe[1];
     }
 
     currCommand = myLine->commandStructures[myLine->numCommands - 1];
-
-    if(pipe(currPipe) < 0) {
-        perror("pipe");
-        // TODO: Change return type to string
-        return 1;
-    }
-
-    myLine->pidArray[currentCommandIndex] = runCommand(currCommand, prevPipe, NULL);
-    myLine->pidArray[currentCommandIndex + 1] = -1;
-    // TODO: Change return type to string
+    myLine->pidArray[myLine->numCommands - 1] = runCommand(currCommand, prevPipe, NULL);
     return 0;
 
 }
