@@ -89,9 +89,8 @@ struct line constructLine(char *input) {
         // Construct the command
         myLine.commandStructures[i] = constructCommand(strdup(currCmdStr), first, last);
 
-
         // Check if errored out
-        if(myLine.commandStructures[0].errored == ERROR_T) {
+        if(myLine.commandStructures[i].errored == ERROR_T) {
             myLine.errored = ERROR_T;
             return myLine;
         }
