@@ -1,8 +1,3 @@
-//
-// Created by Tycho Yacub on 10/15/19.
-//
-
-#include <wait.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -130,5 +125,12 @@ void constructProcess(struct process_node *newNode, int numCommands, pid_t *pidA
         newNode->statuses[i] = -1;
     }
     return;
+}
+
+void deconstructProcess(struct process_node *oldNode){
+    free(oldNode->processIds);
+    free(oldNode->statuses);
+    free(oldNode->input);
+
 }
 

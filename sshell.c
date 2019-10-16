@@ -54,6 +54,7 @@ void simpleShell() {
         myLine = constructLine(input);
 
         if(myLine.errored == 1) {
+            unfinishedProcesses = printCompletedProcessesBackground(unfinishedProcesses);
             continue;
         }
 
@@ -102,6 +103,7 @@ void simpleShell() {
         else{
             //print all completed background commands
             unfinishedProcesses = printAllCompletedProcesses(newProcess, unfinishedProcesses);
+            free(newProcess);
         }
     }
     return;

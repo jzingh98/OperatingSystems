@@ -20,5 +20,6 @@ struct process_node *printAllCompletedProcesses(struct process_node *foreNode, s
 struct process_node *printCompletedProcessesBackground(struct process_node *first_node);
 struct process_node *appendProcess(struct process_node *head_node, struct process_node *new_node);
 void constructProcess(struct process_node *newNode, int numCommands, pid_t *pidArray, char* input);
+void deconstructProcess(struct process_node *oldNode);
 
 #endif //PROJECT1_PROCESSES_H
