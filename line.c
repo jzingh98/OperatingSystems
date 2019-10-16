@@ -14,19 +14,18 @@ char *removeTrailingLeadingWhitespace(char *str){
     if(str[0] == '\0') return str;
 
     //trim leading whitespace
-    while(str[0] == ' ' || str[0] == '\t') str++;
+    while(str[0] == ' ' || str[0] == '\t' || str[0] == '\n') str++;
 
     //Check if was all whitespace
     if(str[0] == '\0') return str;
 
     //trim trailing whitespace
-    int lastNonWhitespace = -1;
-    for (int i = 0; i < strlen(str); i++) {
-        if (str[i] == ' ' && str[i] == '\t' && str[i] == '\n') {
-            lastNonWhitespace = i;
+    for (int i = strlen(str)-1; i >= 0; i--) {
+        if (str[i] == ' ' || str[i] == '\t' || str[i] == '\n') {
+            str[i] = '\0';
         }
+        else break;
     }
-    if(lastNonWhitespace != -1) str[lastNonWhitespace] = '\0';
     return str;
 }
 

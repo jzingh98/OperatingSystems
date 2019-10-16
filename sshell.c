@@ -14,10 +14,15 @@
 void simpleShell();
 
 
+
+int runCdCmd(struct line *myLine);
+
+void runPwdCmd();
+
 int main(int argc, char *argv[])
 {
     simpleShell();
-    return 1;
+    return 0;
 
 }
 
@@ -30,31 +35,32 @@ void simpleShell() {
     struct line myLine;
     struct process_node *unfinishedProcesses = NULL;
 
-    //Prompt user for input
-    fprintf(stdout, "sshell$ ");
-
-    while(getline(&input, &len, stdin)>=0){
+    while(1){
+        //Prints the next shell prompt get the input and removes trialing and leading whitespace.
+        fprintf(stdout, "sshell$ ");
+        getline(&input, &len, stdin);
         if (!isatty(STDIN_FILENO)) {
             printf("%s", input);
             fflush(stdout);
         }
-        strtok(input, "\n");
+        input = removeTrailingLeadingWhitespace(input);
 
-        //TODO: check if all spaces
+        if(input[0] == '\0'){
+            unfinishedProcesses = printCompletedProcessesBackground(unfinishedProcesses);
+            continue;
+        }
 
         // Construct Line
         myLine = constructLine(input);
 
         if(myLine.errored == 1) {
-            fprintf(stdout, "sshell$ ");
-            free(input);
-            input = NULL;
-            len = 0;
             continue;
         }
 
-        // Check Built In Commands
-        if(strcmp(myLine.commandStructures[0].params[0], "exit") == 0) {
+        //Check input against builtin commands
+        char *firstParam = myLine.commandStructures[0].params[0];
+        //Check builtin command which will change the values of finish and cont if those should happen.
+        if (strcmp(firstParam, "exit") == 0){
             if(unfinishedProcesses == NULL) {
                 fprintf(stderr, "Bye...\n");
                 return;
@@ -62,46 +68,25 @@ void simpleShell() {
             else{
                 fprintf(stderr,"Error: active jobs still running\n");
                 fprintf(stderr,"+ completed '%s' [1]\n", input);
-                fprintf(stdout, "sshell$ ");
-                free(input);
-                input = NULL;
-                len = 0;
                 continue;
             }
         }
-        // CD
-        if (strcmp(myLine.commandStructures[0].params[0], "cd") == 0){
-            if (chdir(myLine.commandStructures[0].params[1]) == -1) {
-                fprintf(stderr,"Error: no such directory\n");
-                fprintf(stderr,"+ completed '%s' [1]\n", input);
-                fprintf(stdout, "sshell$ ");
-                free(input);
-                input = NULL;
-                len = 0;
-                continue;
-            }
-            // Return special pid value
-            fprintf(stderr,"+ completed '%s' [0]\n", input);
-            fprintf(stdout, "sshell$ ");
-            free(input);
-            input = NULL;
-            len = 0;
+        if(strcmp(firstParam, "cd") == 0){
+            int cdOut = runCdCmd(&myLine);
+            unfinishedProcesses = printCompletedProcessesBackground(unfinishedProcesses);
+            fprintf(stderr,"+ completed '%s' [%d]\n", input, cdOut);
             continue;
         }
-        // PWD
-        if (strcmp(myLine.commandStructures[0].params[0], "pwd") == 0){
-            char* directory = (char *)malloc(100 * sizeof(char));
-            getcwd(directory, 100);
-            fprintf(stdout,"%s\n", directory);
+        if(strcmp(firstParam, "pwd") == 0){
+            runPwdCmd(&input);
+            unfinishedProcesses = printCompletedProcessesBackground(unfinishedProcesses);
             fprintf(stderr,"+ completed '%s' [0]\n", input);
-            fprintf(stdout, "sshell$ ");
-            free(input);
-            input = NULL;
-            len = 0;
             continue;
         }
 
-        // Execute Line
+
+
+        // If its not a builtin command Execute Line
         if(runLine(&myLine) == 1) exit(1);
 
         //Create new processes node struct
@@ -118,22 +103,23 @@ void simpleShell() {
             //print all completed background commands
             unfinishedProcesses = printAllCompletedProcesses(newProcess, unfinishedProcesses);
         }
-
-        //Print the next shell prompt
-        fprintf(stdout, "sshell$ ");
-        free(input);
-        input = NULL;
-        len = 0;
     }
     return;
 }
 
 
-/*
+void runPwdCmd() {
+    char* directory = (char *)malloc(100 * sizeof(char));
+    getcwd(directory, 100);
+    fprintf(stdout,"%s\n", directory);
+}
 
-
-echo toto | tr o i
-
-
- */
+int runCdCmd(struct line *myLine) {
+    if (chdir((*myLine).commandStructures[0].params[1]) == -1) {
+        fprintf(stderr, "Error: no such directory\n");
+        return 1;
+    }
+    // Return special pid value
+    return 0;
+}
 
