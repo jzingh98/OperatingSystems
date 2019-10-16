@@ -38,6 +38,12 @@ int checkInRedirect(struct command *cmdPtr, char **inputPtr, int first) {
                 fprintf(stderr, "Error: no input file\n");
                 return -1;
             }
+            int fd = open(inputPtr);
+            if(fd == -1) {
+                fprintf(stderr, "Error: cannot open input file\n");
+                return -1;
+            }
+            close(fd);
             cmdPtr->inFile = strdup(*inputPtr);
             return 1;
         }
@@ -61,6 +67,12 @@ int checkOutRedirect(struct command *cmdPtr, char **inputPtr, int last) {
                 fprintf(stderr, "Error: no output file\n");
                 return -1;
             }
+            int fd = open(inputPtr);
+            if(fd == -1) {
+                fprintf(stderr, "Error: cannot open output file\n");
+                return -1;
+            }
+            close(fd);
             cmdPtr->outFile = strdup(*inputPtr);
             return 1;
         }
