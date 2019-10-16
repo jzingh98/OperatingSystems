@@ -39,7 +39,12 @@ void simpleShell() {
             fflush(stdout);
         }
         strtok(input, "\n");
-        if(strcmp(input, "exit") == 0) {
+
+        // Construct Line
+        myLine = constructLine(input);
+
+        // Check Built In Commands
+        if(strcmp(myLine.commandStructures[0].params[0], "exit") == 0) {
             if(unfinishedProcesses == NULL) {
                 fprintf(stderr, "Bye...\n");
                 return;
@@ -54,9 +59,38 @@ void simpleShell() {
                 continue;
             }
         }
+        // CD
+        if (strcmp(myLine.commandStructures[0].params[0], "cd") == 0){
+            if (chdir(myLine.commandStructures[0].params[1]) == -1) {
+                fprintf(stderr,"Error: no such directory\n");
+                fprintf(stderr,"+ completed '%s' [1]\n", input);
+                fprintf(stdout, "sshell$ ");
+                free(input);
+                input = NULL;
+                len = 0;
+                continue;
+            }
+            // Return special pid value
+            fprintf(stderr,"+ completed '%s' [0]\n", input);
+            fprintf(stdout, "sshell$ ");
+            free(input);
+            input = NULL;
+            len = 0;
+            continue;
+        }
+        // PWD
+        if (strcmp(myLine.commandStructures[0].params[0], "pwd") == 0){
+            char* directory = (char *)malloc(100 * sizeof(char));
+            getcwd(directory, 100);
+            fprintf(stdout,"%s\n", directory);
+            fprintf(stderr,"+ completed '%s' [0]\n", input);
+            fprintf(stdout, "sshell$ ");
+            free(input);
+            input = NULL;
+            len = 0;
+            continue;
+        }
 
-        // Construct Line
-        myLine = constructLine(input);
         if(myLine.errored == 1) {
             fprintf(stdout, "sshell$ ");
             free(input);
