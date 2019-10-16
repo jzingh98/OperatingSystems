@@ -182,23 +182,6 @@ pid_t runCommand(struct command cmd, int* prevPipe, int* currPipe){
             close(currPipe[1]);
         }
 
-        // Check Built In Commands
-        // CD
-        if (strcmp(cmd.params[0], "cd") == 0){
-            if (chdir(cmd.params[1]) == -1) {
-                fprintf(stderr,"Error: no such directory\n");
-            }
-            // Return special pid value
-            exit(0);
-        }
-        // PWD
-        if (strcmp(cmd.params[0], "pwd") == 0){
-            char* directory = (char *)malloc(100 * sizeof(char));
-            getcwd(directory, 100);
-            fprintf(stdout,"%s\n", directory);
-            exit(0);
-        }
-
         // Run child command
         execvp(cmd.params[0], cmd.params);
         perror("execvp");

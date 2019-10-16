@@ -8,6 +8,7 @@ struct command {
     char *inFile;
     char *outFile;
     int errored;
+    int builtin;
 };
 
 struct command constructCommand(char *input, int first, int last);
