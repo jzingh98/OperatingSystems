@@ -2,7 +2,7 @@
 // Created by Tycho Yacub on 10/15/19.
 //
 
-#include <wait.h>
+//#include <wait.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -28,6 +28,7 @@ void updateStatusesBackground(pid_t *processIds, int *statuses, int numCommands)
         if(child == 0){
             statuses[i] = -1;
             fill = -1;
+            break;
         }
         else{
             statuses[i] = WEXITSTATUS(status);
@@ -58,19 +59,17 @@ void updateStatusesForeground(pid_t *processIds, int *statuses, int numCommands)
     }
 }
 
-void printCompletedProcessesForeground(struct process_node *node) {
-        updateStatusesForeground(node->processIds, node->statuses, node->numCommands);
-        printCompletedProcess(*node);
+struct process_node *printAllCompletedProcesses(struct process_node *foreNode,struct process_node *backNode){
+    updateStatusesForeground(foreNode->processIds, foreNode->statuses, foreNode->numCommands);
+    backNode = printCompletedProcessesBackground(backNode);
+    printCompletedProcess(*foreNode);
+    return backNode;
 }
-
 
 struct process_node *printCompletedProcessesBackground(struct process_node *first_node) {
     struct process_node *curr_node = first_node;
 
     while(curr_node != NULL){
-        if(curr_node == curr_node->next){
-            printf("error");
-        }
         updateStatusesBackground(curr_node->processIds, curr_node->statuses, curr_node->numCommands);
         //if the process is done then print its exit
         if(curr_node->statuses[curr_node->numCommands-1] != -1) {

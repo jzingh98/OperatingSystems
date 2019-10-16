@@ -16,7 +16,7 @@ struct process_node{
     struct process_node* next;
 };
 
-void printCompletedProcessesForeground(struct process_node *first_node);
+struct process_node *printAllCompletedProcesses(struct process_node *foreNode, struct process_node *backNode);
 struct process_node *printCompletedProcessesBackground(struct process_node *first_node);
 struct process_node *appendProcess(struct process_node *head_node, struct process_node *new_node);
 void constructProcess(struct process_node *newNode, int numCommands, pid_t *pidArray, char* input);

@@ -114,8 +114,7 @@ void simpleShell() {
         }
         else{
             //print all completed background commands
-            unfinishedProcesses = printCompletedProcessesBackground(unfinishedProcesses);
-            printCompletedProcessesForeground(newProcess);
+            unfinishedProcesses = printAllCompletedProcesses(newProcess, unfinishedProcesses);
         }
 
         //Print the next shell prompt
