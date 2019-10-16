@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 
 #include "processes.h"
@@ -30,9 +29,6 @@ void simpleShell() {
     // Data Structures
     struct line myLine;
     struct process_node *unfinishedProcesses = NULL;
-
-    // Other Variables
-    int status;
 
     //Prompt user for input
     fprintf(stdout, "sshell$ ");
