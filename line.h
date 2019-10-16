@@ -18,9 +18,9 @@ struct line {
     int numCommands;
 };
 
+char *removeTrailingLeadingWhitespace(char *str);
 struct line constructLine(char *input);
 int runLine(struct line *myLine);
-char* concat(const char *s1, const char *s2);
 
 #endif
 
