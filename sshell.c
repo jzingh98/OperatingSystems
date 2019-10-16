@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -16,7 +17,6 @@ void simpleShell();
 int main(int argc, char *argv[])
 {
     simpleShell();
-    printf("done");
     return 1;
 
 }
@@ -33,7 +33,11 @@ void simpleShell() {
     //Prompt user for input
     fprintf(stdout, "sshell$ ");
 
-    while(getline(&input, &len, stdin)>=0){echo -e "date\nexit\n" | ./sshell
+    while(getline(&input, &len, stdin)>=0){
+        if (!isatty(STDIN_FILENO)) {
+            printf("%s", input);
+            fflush(stdout);
+        }
         strtok(input, "\n");
         if(strcmp(input, "exit") == 0) {
             if(unfinishedProcesses == NULL) {
