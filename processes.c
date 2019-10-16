@@ -2,7 +2,7 @@
 // Created by Tycho Yacub on 10/15/19.
 //
 
-#include <stdlib.h>
+#include <wait.h>
 #include <stdio.h>
 #include <string.h>
 
