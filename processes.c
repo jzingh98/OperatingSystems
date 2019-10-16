@@ -18,28 +18,36 @@ void printCompletedProcess(struct process_node process){
     return;
 }
 
-void updateStatuses(pid_t *processIds, int *statuses, int numCommands, int wait) {
+void updateStatusesBackground(pid_t *processIds, int *statuses, int numCommands){
     int i = 0;
     int fill;
     int status;
     while(i < numCommands){
-        if(wait == 1){
-            waitpid(processIds[i], &status, 0);
-            statuses[i] = WEXITSTATUS(status);
-            if(statuses[i] > 0) {
-                fill = 0;
-                break;
-            }
+        pid_t child = waitpid(processIds[i], &status, WNOHANG);
+        if(child == 0){
+            statuses[i] = -1;
+            fill = -1;
         }
         else{
-            pid_t child = waitpid(processIds[i], &status, WNOHANG);
-            if(child == 0){
-                statuses[i] = -1;
-                fill = -1;
-            }
-            else{
-                statuses[i] = WEXITSTATUS(status);
-            }
+            statuses[i] = WEXITSTATUS(status);
+        }
+        i++;
+    }
+    i++;
+    while(i < numCommands){
+        statuses[i] = fill;
+    }
+}
+void updateStatusesForeground(pid_t *processIds, int *statuses, int numCommands) {
+    int i = 0;
+    int fill;
+    int status;
+    while(i < numCommands){
+        waitpid(processIds[i], &status, 0);
+        statuses[i] = WEXITSTATUS(status);
+        if(statuses[i] > 0) {
+            fill = 0;
+            break;
         }
         i++;
     }
@@ -49,14 +57,20 @@ void updateStatuses(pid_t *processIds, int *statuses, int numCommands, int wait)
     }
 }
 
-struct process_node *printCompletedProcesses(struct process_node *first_node) {
+void printCompletedProcessesForeground(struct process_node *node) {
+        updateStatusesForeground(node->processIds, node->statuses, node->numCommands);
+        printCompletedProcess(*node);
+}
+
+
+struct process_node *printCompletedProcessesBackground(struct process_node *first_node) {
     struct process_node *curr_node = first_node;
 
     while(curr_node != NULL){
         if(curr_node == curr_node->next){
             printf("error");
         }
-        updateStatuses(curr_node->processIds, curr_node->statuses, curr_node->numCommands, curr_node->wait);
+        updateStatusesBackground(curr_node->processIds, curr_node->statuses, curr_node->numCommands);
         //if the process is done then print its exit
         if(curr_node->statuses[curr_node->numCommands-1] != -1) {
             printCompletedProcess(*curr_node);
@@ -103,12 +117,11 @@ struct process_node *appendProcess(struct process_node *head_node, struct proces
     return head_node;
 }
 
-void constructProcess(struct process_node *newNode, int numCommands, pid_t *pidArray, char* input, int wait){
+void constructProcess(struct process_node *newNode, int numCommands, pid_t *pidArray, char* input){
     newNode->processIds = (pid_t*)malloc(numCommands* sizeof(pid_t));
     newNode->statuses = (int*)malloc(numCommands* sizeof(int));
     newNode->input = strdup(input);
     newNode->numCommands = numCommands;
-    newNode->wait = wait;
     newNode->prev = NULL;
     newNode->next = NULL;
 

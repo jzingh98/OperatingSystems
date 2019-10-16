@@ -12,13 +12,13 @@ struct process_node{
     int *statuses;
     char *input;
     int numCommands;
-    int wait;
     struct process_node* prev;
     struct process_node* next;
 };
 
-struct process_node *printCompletedProcesses(struct process_node *first_node);
+void printCompletedProcessesForeground(struct process_node *first_node);
+struct process_node *printCompletedProcessesBackground(struct process_node *first_node);
 struct process_node *appendProcess(struct process_node *head_node, struct process_node *new_node);
-void constructProcess(struct process_node *newNode, int numCommands, pid_t *pidArray, char* input, int wait);
+void constructProcess(struct process_node *newNode, int numCommands, pid_t *pidArray, char* input);
 
 #endif //PROJECT1_PROCESSES_H

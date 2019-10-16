@@ -57,27 +57,34 @@ void simpleShell() {
 
         // Construct Line
         myLine = constructLine(input);
+        if(myLine.errored == 1) {
+            fprintf(stdout, "sshell$ ");
+            free(input);
+            input = NULL;
+            len = 0;
+            continue;
+        }
 
         // Execute Line
         status = runLine(&myLine);
 
-        int wait = 1;
-        if(myLine.backgrounded == 1) wait = 0;
+        //Create new processes node struct
         struct process_node *newProcess = (struct process_node*) malloc(sizeof(struct process_node));
-        constructProcess(newProcess, myLine.numCommands, myLine.pidArray, input, wait);
-        if(unfinishedProcesses == newProcess){
-            printf("error");
+        constructProcess(newProcess, myLine.numCommands, myLine.pidArray, input);
+
+        if(myLine.backgrounded == 1){
+            //If its to be done in the background add it to the stack
+            unfinishedProcesses = appendProcess(unfinishedProcesses, newProcess);
+            //print all completed background commands
+            unfinishedProcesses = printCompletedProcessesBackground(unfinishedProcesses);
         }
-        unfinishedProcesses = appendProcess(unfinishedProcesses, newProcess);
-        if(unfinishedProcesses != NULL && unfinishedProcesses == unfinishedProcesses->next){
-            printf("error");
+        else{
+            //print all completed background commands
+            unfinishedProcesses = printCompletedProcessesBackground(unfinishedProcesses);
+            printCompletedProcessesForeground(newProcess);
         }
 
-        //if not backgrounded wait for the current process to finish;
-
-        unfinishedProcesses = printCompletedProcesses(unfinishedProcesses);
-
-
+        //Print the next shell prompt
         fprintf(stdout, "sshell$ ");
         free(input);
         input = NULL;
