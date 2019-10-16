@@ -43,6 +43,14 @@ void simpleShell() {
         // Construct Line
         myLine = constructLine(input);
 
+        if(myLine.errored == 1) {
+            fprintf(stdout, "sshell$ ");
+            free(input);
+            input = NULL;
+            len = 0;
+            continue;
+        }
+
         // Check Built In Commands
         if(strcmp(myLine.commandStructures[0].params[0], "exit") == 0) {
             if(unfinishedProcesses == NULL) {
@@ -84,14 +92,6 @@ void simpleShell() {
             getcwd(directory, 100);
             fprintf(stdout,"%s\n", directory);
             fprintf(stderr,"+ completed '%s' [0]\n", input);
-            fprintf(stdout, "sshell$ ");
-            free(input);
-            input = NULL;
-            len = 0;
-            continue;
-        }
-
-        if(myLine.errored == 1) {
             fprintf(stdout, "sshell$ ");
             free(input);
             input = NULL;
