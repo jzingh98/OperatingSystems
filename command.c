@@ -184,7 +184,7 @@ pid_t runCommand(struct command cmd, int* prevPipe, int* currPipe){
 
         // Run child command
         execvp(cmd.params[0], cmd.params);
-        perror("execvp");
+        fprintf(stderr, "Error: command not found\n");
         exit(1);
 
 
