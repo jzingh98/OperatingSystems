@@ -33,11 +33,11 @@ void simpleShell() {
     //Prompt user for input
     fprintf(stdout, "sshell$ ");
 
-    while(getline(&input, &len, stdin)>=0){
+    while(getline(&input, &len, stdin)>=0){echo -e "date\nexit\n" | ./sshell
         strtok(input, "\n");
         if(strcmp(input, "exit") == 0) {
             if(unfinishedProcesses == NULL) {
-                fprintf(stderr, "Bye...");
+                fprintf(stderr, "Bye...\n");
                 return;
             }
             else{
