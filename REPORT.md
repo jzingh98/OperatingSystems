@@ -21,7 +21,7 @@ Line.C defines the line struct, which is itself composed of an array of
 **command** structs (as well as supporting fields used to track errors, 
 background processes, etc.). There are two primary associated 
 functions: **constructLine** and **runLine**. ConstructLine accepts a 
-char array of user input and parses it, creating a command struct for 
+character array of user input and parses it, creating a command struct for 
 each individual command separated by the "|" character. Non exec 
 related errors are also checked for during line construction. RunLine is 
 responsible for the execution of each command, as well as the 
@@ -71,4 +71,5 @@ https://www.cs.rutgers.edu/~pxk/416/notes/c-tutorials/pipe.html
 To test the correctness of our project, we used the provided test script 
 and example inputs and outputs on the homework prompt. We also 
 relied heavily on the CLion IDE and its debugger.
+
 
