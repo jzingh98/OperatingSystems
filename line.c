@@ -54,6 +54,8 @@ struct line constructLine(char *input) {
         if(nextToken == NULL) last = 1;
         else last = 0;
 
+        //trim leading whitespace
+        while(token[0] == ' ' || token[0] == '\t') token++;
         //Check to see if the command should be backgrounded
         if(last == 1) {
             int posLastNonWhite = lastNonWhite(token);

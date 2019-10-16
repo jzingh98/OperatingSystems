@@ -9,7 +9,7 @@
 #define DELIMS " "
 #define IN_REDIRECT "<"
 #define OUT_REDIRECT ">"
-#define BACKGROUND_COMMAND "&"
+#define BACKGROUND_COMMAND '&'
 #define ERROR_T 1
 #define ERROR_F 0
 
@@ -83,7 +83,7 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     cmd.errored = ERROR_F;
 
     // Command-string level error
-    if(strcmp(param,IN_REDIRECT) == 1 || strcmp(param, OUT_REDIRECT) == 1 || strcmp(param, BACKGROUND_COMMAND) == 1) {
+    if(cmdStrCpy[0] == '\0' || strcmp(param,IN_REDIRECT) == 1 || strcmp(param, OUT_REDIRECT) == 1) {
         fprintf(stderr, "Error: missing command\n");
         cmd.errored = ERROR_T;
         return cmd;
@@ -94,7 +94,7 @@ struct command constructCommand(char *cmdStr, int first, int last) {
     while(param != NULL){
 
         // Command-string level errors
-        if(last == 0 && strchr(param, '&') != NULL) {
+        if(last == 0 && strchr(param, BACKGROUND_COMMAND) != NULL) {
             fprintf(stderr, "Error: mislocated background sign\n");
             cmd.errored = ERROR_T;
             return cmd;
