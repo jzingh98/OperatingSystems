@@ -1,3 +1,4 @@
+#include <wait.h>
 #include <stdio.h>
 #include <string.h>
 
